@@ -1,0 +1,18 @@
+project_root/
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── config/
+│   │   ├── __init__.py
+│   │   └── browser_config.py
+│   ├── models/
+│   │   ├── __init__.py
+│   │   └── schemas.py
+│   ├── services/
+│   │   ├── __init__.py
+│   │   └── crawler_service.py
+│   └── api/
+│       ├── __init__.py
+│       └── routes.py
+├── requirements.txt
+└── README.md 

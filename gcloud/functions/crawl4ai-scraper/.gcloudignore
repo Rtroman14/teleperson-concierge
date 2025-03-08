@@ -1,0 +1,9 @@
+.gcloudignore
+.git
+.gitignore
+__pycache__/
+.pytest_cache
+*.pyc
+venv/
+crawl-links-costco.json
+deploy.txt
