@@ -8,7 +8,7 @@ import ChatModel from "@/lib/chat-model";
 import _ from "@/lib/Helpers";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-import { findRelevantContent } from "@/lib/chat/teleperson/chatHelpers.Teleperson";
+import { findRelevantContent } from "@/lib/chat-helpers";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
