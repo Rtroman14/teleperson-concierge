@@ -17,7 +17,7 @@ async function splitDocsIntoChunks({ text, metadata }) {
     return await textSplitter.splitDocuments([new Document({ pageContent: text, metadata })]);
 }
 
-async function chunkEmbedInsert({ succeededScrape, pipe, teamID, supabase, chatbotID, vendor }) {
+async function chunkEmbedInsert({ succeededScrape, pipe, supabase, vendor }) {
     try {
         const docs = await splitDocsIntoChunks({
             text: succeededScrape.text,
@@ -45,16 +45,9 @@ async function chunkEmbedInsert({ succeededScrape, pipe, teamID, supabase, chatb
                 embedding: Array.from(output.data),
             };
 
-            // Add fields based on whether vendor exists
-            if (vendor) {
-                docData.vendor_id = vendor.id;
-                docData.vendor_name = vendor.name;
-                docData.teleperson_web_page_id = succeededScrape.id;
-            } else {
-                docData.team_id = teamID;
-                docData.chatbots_id = chatbotID;
-                docData.web_pages_id = succeededScrape.id;
-            }
+            docData.vendor_id = vendor.id;
+            docData.vendor_name = vendor.name;
+            docData.web_pages_id = succeededScrape.id;
 
             newDocs.push(docData);
         }
@@ -76,20 +69,18 @@ async function chunkEmbedInsert({ succeededScrape, pipe, teamID, supabase, chatb
         newDocs = [...contextualizedDocs, ...summaryDocs];
 
         // Insert into appropriate table based on vendor
-        const documentsTableName = vendor ? "teleperson_documents" : "documents_gte";
-        const { error } = await supabase.from(documentsTableName).insert(newDocs);
+        const { error } = await supabase.from("documents").insert(newDocs);
         if (error) throw new Error(error.message);
 
-        const webPagesTableName = vendor ? "teleperson_web_pages" : "web_pages";
         const { data: updatedWebPage, error: updatedWebPageError } = await supabase
-            .from(webPagesTableName)
+            .from("web_pages")
             .update({
                 status: "Trained",
                 num_characters: succeededScrape.numCharacters,
                 title: succeededScrape.title,
                 description: succeededScrape.description,
                 error_message: null,
-                vendor_id: vendor?.id || null,
+                vendor_id: vendor.id,
             })
             .eq("id", succeededScrape.id)
             .select();

@@ -44,7 +44,7 @@ export const contextualizeChunks = async ({ docs, text }) => {
             apiKey: process.env.GOOGLE_AI_API_KEY,
         });
         const googleInstance2 = createGoogleGenerativeAI({
-            apiKey: process.env.GOOGLE_AI_API_KEY_WEBAGENT,
+            apiKey: process.env.GOOGLE_AI_API_KEY_TELEPERSON,
         });
 
         // Process docs in batches of 10

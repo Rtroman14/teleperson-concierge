@@ -11,7 +11,7 @@ import { chunkEmbedInsert } from "./src/documentProcessing.js";
 import { handleFailedScrapes } from "./src/retryHandler.js";
 
 functions.http("scrape-and-embed", async (req, res) => {
-    const { webPages, chatbotID, teamID, vendor = null, retries = 0 } = req.body;
+    const { webPages, vendor = null, retries = 0 } = req.body;
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PRIVATE_KEY, {
         auth: { persistSession: false },
     });
@@ -47,8 +47,6 @@ functions.http("scrape-and-embed", async (req, res) => {
 
         await handleFailedScrapes({
             failedScrapes,
-            chatbotID,
-            teamID,
             vendor,
             retries,
         });
@@ -62,9 +60,7 @@ functions.http("scrape-and-embed", async (req, res) => {
             chunkEmbedInsert({
                 succeededScrape,
                 pipe,
-                teamID,
                 supabase,
-                chatbotID,
                 vendor,
             })
         );
@@ -79,7 +75,7 @@ functions.http("scrape-and-embed", async (req, res) => {
         console.error(error.message);
 
         await slackNotification({
-            username: "Scrape and Embed",
+            username: "Scrape and Embed (Teleperson)",
             text: error.message,
         });
 

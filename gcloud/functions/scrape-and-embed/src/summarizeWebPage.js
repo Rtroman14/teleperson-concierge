@@ -14,7 +14,7 @@ ${text}
 export const summarizeWebPage = async ({ docs, text, pipe }) => {
     try {
         const google = createGoogleGenerativeAI({
-            apiKey: process.env.GOOGLE_AI_API_KEY_WEBAGENT,
+            apiKey: process.env.GOOGLE_AI_API_KEY_TELEPERSON,
         });
 
         const { object } = await generateObject({
