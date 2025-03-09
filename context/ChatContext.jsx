@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useChat } from "ai/react";
 import Vapi from "@vapi-ai/web";
 import { nanoid } from "@/lib/utils";
+import { getSystemMessage, getVapiAssistantConfig } from "@/lib/agent-settings";
 
 const ChatContext = createContext({});
 
@@ -14,59 +15,6 @@ const mapMessages = (messages) =>
 
 // * use local storage for wa-user
 // * user session storage for conversationID && wa-thread
-
-const instructions = ({ firstName, vendors }) => {
-    let personalizedGreeting = "Please provide personalized, unbiased guidance to assist the user.";
-    if (firstName) {
-        personalizedGreeting = `You are currently assisting ${firstName}. Ensure that your guidance is tailored and directly addresses the user's inquiry.`;
-    }
-
-    return `
-## Context:
-You are Teleperson's AI-powered Concierge, a neutral and independent assistant dedicated to providing clear, factual, and unbiased guidance to users regarding vendors in their Vendor Hub. ${personalizedGreeting} Your role is to support users on any questions related to Teleperson or the vendors in their vendor hub.
-
-## Vendors (${vendors.length}) in ${firstName}'s Vendor Hub:
-${vendors.map((vendor) => `- ${vendor}`).join("\n")}
-
-## Core Function:
-- Offer practical assistance and general support for vendor-related inquiries.
-- Equip users with actionable information to effectively manage their vendor relationships.
-
-## Identity and Boundaries:
-You are the Teleperson Concierge—a professional, neutral, and independent customer service assistant.
-- Respond with clear, factual, and instructional language.
-- Avoid vendor-specific biased wording (e.g., "we believe").
-- Provide detailed guidance such as "TruStage does X. To accomplish this, please follow these steps…".
-
-## Guidelines:
-1. **Confidentiality**: Do not reference or disclose your internal knowledge base.
-2. **Neutral Tone and Clarity**: Maintain a balanced and informative tone.
-3. **Focus**: Keep responses relevant to Teleperson and the vendors in the user's Vendor Hub.
-4. **Direct Support**: Provide all necessary details directly in your response.
-5. **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.
-6. **Avoid Repetition**: Do not repeat the same phrases or examples across responses.
-7. **Tool Invocation Requirement**: Always invoke the \`get_more_information\` tool when the user's inquiry involves vendor-specific queries. If additional detail is required, use this tool to obtain accurate information before providing your final answer.
-8. **Fallback Response**: If specific details are not available, reply with:  
-   "I apologize, but I don't have specific information about [user's query]. However, I'd be happy to assist you with any questions related to Teleperson or vendor support within your Vendor Hub."
-9. **User Address**: Avoid mentioning the user's name in every message.
-
-## Available Tools:
-### get_more_information
-- **Description**: Retrieves detailed information about a vendor.
-- **When to Use**: Invoke this tool when the user's query involves detailed inquiries about vendor-specific features, policies, or other relevant details.
-- **Parameters**:
-  - \`vendor_name\` (string): The name of the vendor that the user is asking about.
-  - \`user_question\` (string): The detailed inquiry from the user. It should include enough context to be a standalone question or inquiry
-
-### get_users_transactions
-- **Description**: Retrieves the user's bank transactions.
-- **When to Use**: Use this tool when the user inquires about their recent transactions or payment history.
-
-### get_users_vendors
-- **Description**: Fetches an up-to-date list of vendors in the user's Vendor Hub.
-- **When to Use**: Use this tool to provide an overview of available vendors and their descriptions.
-`;
-};
 
 // Add this function before the ChatProvider component
 const getTimeBasedGreeting = () => {
@@ -98,7 +46,7 @@ const initialTelepersonUser = {
     email: "",
     name: "",
     firstName: "",
-    lastNAme: "",
+    lastName: "",
     vendors: [],
 };
 
@@ -107,6 +55,7 @@ export function ChatProvider({ children, ...props }) {
     const [chatbotSettings, setChatbotSettings] = useState(props.initialSettings);
     const [conversationID, setConversationID] = useState(null);
     const [telepersonUser, setTelepersonUser] = useState(initialTelepersonUser);
+    const [previousConversations, setPreviousConversations] = useState(null);
 
     // Create dynamic initial messages
     const [initialMessages, setInitialMessages] = useState(
@@ -131,6 +80,7 @@ export function ChatProvider({ children, ...props }) {
             chatbotSettings: props.initialSettings,
             conversationID,
             telepersonUser,
+            previousConversations,
         },
         experimental_throttle: 50,
         onFinish: (event) => {
@@ -140,38 +90,37 @@ export function ChatProvider({ children, ...props }) {
             if (newConversationID && newConversationID !== conversationID) {
                 setConversationID(newConversationID);
 
-                if (props.environment !== "sandbox") {
-                    sessionStorage.setItem("wa-conversationID", newConversationID);
-                }
+                sessionStorage.setItem("wa-conversationID", newConversationID);
             }
         },
     });
 
-    // TODO: add test telepersonUser
-
-    // * Load teleperson user from localStorage on initial render
     useEffect(() => {
-        const storedTelepersonUser = localStorage.getItem("teleperson-user");
-
-        if (storedTelepersonUser) {
-            try {
-                const parsedUser = JSON.parse(storedTelepersonUser);
-                setTelepersonUser(parsedUser);
-            } catch (error) {
-                console.error("Error parsing teleperson user from localStorage:", error);
-                localStorage.removeItem("teleperson-user");
-            }
-        } else {
-            // ! DELETE THIS IN PRODUCTION
-            // If no user in localStorage, fetch with default email for development
-            fetchTelepersonUserData("jesse@teleperson.com");
-        }
+        fetchTelepersonUserData("jesse@teleperson.com");
     }, []);
+    // * Load teleperson user from localStorage on initial render
+    // useEffect(() => {
+    //     const storedTelepersonUser = localStorage.getItem("teleperson-user");
+
+    //     if (storedTelepersonUser) {
+    //         try {
+    //             const parsedUser = JSON.parse(storedTelepersonUser);
+    //             setTelepersonUser(parsedUser);
+    //         } catch (error) {
+    //             console.error("Error parsing teleperson user from localStorage:", error);
+    //             localStorage.removeItem("teleperson-user");
+    //         }
+    //     } else {
+    //         // ! DELETE THIS IN PRODUCTION
+    //         // If no user in localStorage, fetch with default email for development
+    //         fetchTelepersonUserData("jesse@teleperson.com");
+    //     }
+    // }, []);
 
     // * Fetch user data and vendors from Teleperson API
     const fetchTelepersonUserData = async (email) => {
         try {
-            const response = await fetch("/api/teleperson/user", {
+            const response = await fetch("/api/user", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -191,13 +140,26 @@ export function ChatProvider({ children, ...props }) {
                 email: userData.user.email,
                 name: `${userData.user.firstName} ${userData.user.lastName}`,
                 firstName: userData.user.firstName,
-                lastNAme: userData.user.lastName,
+                lastName: userData.user.lastName,
                 vendors: userData.vendors.map((vendor) => vendor.companyName),
             };
 
             // Save to localStorage and update state
             localStorage.setItem("teleperson-user", JSON.stringify(formattedUser));
             setTelepersonUser(formattedUser);
+
+            // Fetch previous conversations if we have a user ID
+            if (formattedUser.id) {
+                const conversationsResponse = await fetch(
+                    `/api/user/${formattedUser.id}/conversations`
+                );
+                if (conversationsResponse.ok) {
+                    const conversationsData = await conversationsResponse.json();
+                    if (conversationsData.success) {
+                        setPreviousConversations(conversationsData.data.llmFormat);
+                    }
+                }
+            }
 
             return formattedUser;
         } catch (error) {
@@ -249,9 +211,7 @@ export function ChatProvider({ children, ...props }) {
     }, [telepersonUser]);
 
     const handleRefresh = () => {
-        if (props.environment !== "sandbox") {
-            sessionStorage.setItem("wa-thread", JSON.stringify(initialMessages));
-        }
+        sessionStorage.setItem("wa-thread", JSON.stringify(initialMessages));
         sessionStorage.removeItem("wa-conversationID");
 
         setMessages(initialMessages);
@@ -260,20 +220,12 @@ export function ChatProvider({ children, ...props }) {
     };
 
     useEffect(() => {
-        if (props.environment === "sandbox") return;
-
         if (!isLoading && messages.length > props.initialMessages.length) {
             sessionStorage.setItem("wa-thread", JSON.stringify(messages));
         }
     }, [isLoading]);
 
     useEffect(() => {
-        if (props.environment === "sandbox") {
-            localStorage.removeItem("wa-user");
-
-            return;
-        }
-
         let storedChatUser = localStorage.getItem("wa-user");
         let storedConversationID = sessionStorage.getItem("wa-conversationID");
 
@@ -311,9 +263,7 @@ export function ChatProvider({ children, ...props }) {
         if (conversationID !== data?.conversationID && data?.conversationID) {
             setConversationID(data.conversationID);
 
-            if (props.environment !== "sandbox") {
-                sessionStorage.setItem("wa-conversationID", data.conversationID);
-            }
+            sessionStorage.setItem("wa-conversationID", data.conversationID);
         }
     }, [data?.conversationID]);
 
@@ -468,242 +418,13 @@ export function ChatProvider({ children, ...props }) {
             ? `${timeGreeting} ${firstName}, this is Jessica, your Teleperson Concierge. How can I help you today?`
             : "Hey, this is Jessica, your Teleperson Concierge. Who do I have the pleasure of speaking with today?";
 
-        console.log(`telepersonUser.id -->`, telepersonUser.id);
-
-        return {
-            // name: "Teleperson Concierge",
+        return getVapiAssistantConfig({
+            firstName,
+            vendors,
             firstMessage,
-            // transcriber: {
-            //     provider: "deepgram",
-            //     model: "nova-2",
-            //     language: "en-US",
-            // },
-            // voice: {
-            //     provider: "cartesia",
-            //     voiceId: "794f9389-aac1-45b6-b726-9d9369183238",
-            // },
-            voice: {
-                provider: "11labs",
-                voiceId: "g6xIsTj2HwM6VR4iXFCw",
-            },
-            serverMessages: [
-                "tool-calls",
-                "end-of-call-report",
-                `transcript[transcriptType="final"]`,
-            ],
-            model: {
-                provider: "openai",
-                model: "gpt-4o-mini",
-                // provider: "google",
-                // model: "gemini-2.0-flash",
-                // model: "gemini-2.0-pro-exp-02-05",
-                messages: [
-                    {
-                        role: "system",
-                        content: instructions({ firstName, vendors }),
-                    },
-                ],
-                tools: [
-                    {
-                        type: "function",
-                        async: false,
-                        function: {
-                            name: "get_more_information",
-                            description: "Get more information about the vendor",
-                            parameters: {
-                                type: "object",
-                                properties: {
-                                    vendor_name: {
-                                        type: "string",
-                                        description:
-                                            "The name of the vendor that the user is talking about",
-                                        enum: vendors,
-                                    },
-                                    user_question: {
-                                        type: "string",
-                                        description:
-                                            "The detailed inquiry from the user. It should include enough context to be a standalone question or inquiry",
-                                    },
-                                },
-                                required: ["vendor_name", "user_question"],
-                            },
-                        },
-                        messages: [
-                            {
-                                type: "request-start",
-                                content: "Let me look into this...",
-                            },
-                            {
-                                type: "request-start",
-                                content: "Let me check...",
-                            },
-                            {
-                                type: "request-start",
-                                content: "Let me see what I can find on that...",
-                            },
-                            // {
-                            //     type: "request-complete",
-                            //     content: "The weather in location is",
-                            // },
-                            {
-                                type: "request-failed",
-                                content: "I couldn't get the information right now.",
-                            },
-                            // {
-                            //     type: "request-response-delayed",
-                            //     content:
-                            //         "It appears there is some delay in communication with the weather API.",
-                            //     timingMilliseconds: 2000,
-                            // },
-                        ],
-                        server: {
-                            url: "https://webagent.ai/api/chat/teleperson/voice/vapi",
-                            // url: "https://df28-2601-280-5c00-7d80-5804-412f-123c-8fcd.ngrok-free.app/api/chat/teleperson/voice/vapi",
-                            timeoutSeconds: 30,
-                        },
-                    },
-                    {
-                        type: "function",
-                        async: false,
-                        function: {
-                            name: "get_users_transactions",
-                            description: "Get the user's bank transactions",
-                            parameters: {
-                                type: "object",
-                                properties: {
-                                    teleperson_user_id: {
-                                        type: "number",
-                                        description: `The id of the teleperson user which is ${telepersonUser.id}`,
-                                    },
-                                },
-                                required: ["teleperson_user_id"],
-                            },
-                            // strict: true,
-                        },
-                        messages: [
-                            {
-                                type: "request-start",
-                                content: "Let me look into this...",
-                            },
-                            {
-                                type: "request-start",
-                                content: "Let me check...",
-                            },
-                            {
-                                type: "request-start",
-                                content: "Let me see what I can find on that...",
-                            },
-                            {
-                                type: "request-failed",
-                                content: "I couldn't get the information right now.",
-                            },
-                        ],
-                        server: {
-                            url: "https://webagent.ai/api/chat/teleperson/voice/transactions",
-                            // url: "https://e4f0-2601-280-5c00-7d80-19c7-4be4-67ae-76d6.ngrok-free.app/api/chat/teleperson/voice/transactions",
-                            timeoutSeconds: 30,
-                        },
-                    },
-                    {
-                        type: "function",
-                        async: false,
-                        function: {
-                            name: "get_users_vendors",
-                            description:
-                                "Get a list of vendors and their descriptions from the user's vendor hub",
-                            parameters: {
-                                type: "object",
-                                properties: {
-                                    teleperson_user_id: {
-                                        type: "number",
-                                        description: `The id of the teleperson user which is ${telepersonUser.id}`,
-                                    },
-                                },
-                                required: ["teleperson_user_id"],
-                            },
-                        },
-                        messages: [
-                            {
-                                type: "request-start",
-                                content: "Let me look into this...",
-                            },
-                            {
-                                type: "request-start",
-                                content: "Let me check...",
-                            },
-                            {
-                                type: "request-start",
-                                content: "Let me see what I can find on that...",
-                            },
-                            {
-                                type: "request-failed",
-                                content: "I couldn't get the information right now.",
-                            },
-                        ],
-                        server: {
-                            url: "https://webagent.ai/api/chat/teleperson/voice/vendors",
-                            // url: "https://6cb6-199-117-62-42.ngrok-free.app/api/chat/teleperson/voice/vendors",
-                            timeoutSeconds: 30,
-                        },
-                    },
-                ],
-            },
-            modelOutputInMessagesEnabled: true,
-            stopSpeakingPlan: {
-                numWords: 3,
-                voiceSeconds: 0.2,
-                backoffSeconds: 1,
-                acknowledgementPhrases: [
-                    "i understand",
-                    "i see",
-                    "i got it",
-                    "i hear you",
-                    "im listening",
-                    "im with you",
-                    "right",
-                    "okay",
-                    "ok",
-                    "sure",
-                    "alright",
-                    "got it",
-                    "understood",
-                    "yeah",
-                    "yes",
-                    "uh-huh",
-                    "mm-hmm",
-                    "gotcha",
-                    "mhmm",
-                    "ah",
-                    "yeah okay",
-                    "yeah sure",
-                ],
-                interruptionPhrases: [
-                    "stop",
-                    "shut up",
-                    "enough",
-                    "quiet",
-                    "silence",
-                    "but",
-                    "dont",
-                    "nevermind",
-                    "never",
-                    "bad",
-                    "actually",
-                ],
-            },
-            silenceTimeoutSeconds: 30,
-            maxDurationSeconds: 600,
-            backgroundSound: "off",
-            server: {
-                url: "https://webhook.site/39d44ed3-8a39-4de2-be7d-57a71e0f07cc",
-            },
-            // credentials: [
-            //     {
-            //         provider: "11labs",
-            //         apiKey: "api",
-            //     },
-            // ],
-        };
+            telepersonUserId: telepersonUser.id,
+            previousConversations,
+        });
     };
 
     // Update the startCallInline function to create dynamic assistantOptions

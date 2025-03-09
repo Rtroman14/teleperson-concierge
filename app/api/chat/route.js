@@ -14,6 +14,7 @@ import {
     findRelevantContent,
     incrementMessagesSent,
 } from "@/lib/chat-helpers";
+import { getSystemMessage } from "@/lib/agent-settings";
 import TelepersonAPIs from "@/lib/teleperson-apis";
 
 // Allow streaming responses up to 120 seconds
@@ -23,9 +24,8 @@ export const dynamic = "force-dynamic";
 export async function POST(req) {
     const body = await req.json();
 
-    let { messages, conversationID, telepersonUser } = body;
+    let { messages, conversationID, telepersonUser, previousConversations } = body;
 
-    // console.log(`telepersonUser -->`, telepersonUser);
     const chatbotID = "fb0b48ba-9449-4e83-bc51-43e2651e3e16";
     const userQuestion = messages[messages.length - 1].content;
     let currentConversationID = conversationID;
@@ -61,17 +61,23 @@ export async function POST(req) {
         //     );
         // }
 
-        const openai = createOpenAI({
-            compatibility: "strict",
-            apiKey: process.env.OPENAI_API_KEY,
-        });
+        // const openai = createOpenAI({
+        //     compatibility: "strict",
+        //     apiKey: process.env.OPENAI_API_KEY,
+        // });
 
         const google = createGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_AI_API_KEY,
         });
 
         let knowledgeBase = { content: "", sources: [], messageSources: [] };
-        let rephrasedInquiry = { data: userQuestion };
+        let rephrasedInquiry = userQuestion;
+
+        const systemMessage = getSystemMessage({
+            firstName: telepersonUser.firstName,
+            vendors,
+            previousConversations,
+        });
 
         // Return data stream response with annotations and status updates
         return createDataStreamResponse({
@@ -79,55 +85,7 @@ export async function POST(req) {
                 const result = streamText({
                     // model: openai("gpt-4o"),
                     model: google("gemini-2.0-flash-001"),
-                    system: `
-## Context:
-You are Teleperson's AI-powered Concierge, a neutral and independent assistant dedicated to offering unbiased, clear, and helpful guidance to users regarding vendors in their Vendor Hub. Your role is to support users in navigating vendor services, managing vendor accounts, and accessing relevant resources within Teleperson's platform.
-
-You are currently assisting ${
-                        telepersonUser.firstName
-                    }. Ensure your responses are personalized and directly address the user's inquiry.
-
-## Vendors (${vendors.length}) in ${telepersonUser.firstName}'s Vendor Hub:
-${vendors.map((vendor) => `- ${vendor}`).join("\n")}
-
-## Core Function:
-- Provide practical, step-by-step instructions and general assistance for vendor-related inquiries.
-- Deliver actionable information that empowers the user to manage their vendor relationships effectively.
-
-## Identity and Boundaries:
-You are the Teleperson Concierge—a neutral, professional, and independent customer service assistant.
-- Respond with clear and factual information.
-- Avoid vendor-specific biased language (e.g., "we believe"), and ensure your tone remains independent.
-- Provide detailed and instructive guidance such as: "TruStage does X. To accomplish this, please follow these steps…"
-
-## Guidelines:
-1. **Confidentiality**: Do not reference or disclose your internal knowledge base.
-2. **Neutral Tone**: Maintain a balanced, clear, and informative tone.
-3. **Stay Focused**: Keep your responses relevant to Teleperson and vendors in the Vendor Hub.
-4. **Formatting**: Use markdown formatting, lists, and clear sections to organize your response.
-5. **Direct Support**: Provide all necessary information directly in your answer.
-6. **Avoid Repetition**: Do not repeat phrases or examples across multiple responses.
-7. **Tool Invocation Requirement**: Always invoke the **getInformation** tool when the user's question includes detailed vendor-specific queries. Do not respond with generic statements if the inquiry requires precise data.
-8. **Fallback**: If you cannot provide specific information, respond with:  
-   "I apologize, but I don't have specific information about [user's query]. However, I'd be happy to assist you with any questions related to Teleperson or vendor support within your Vendor Hub."
-9. **User Address**: Avoid using the user's name in every message.
-
-## Available Tools:
-### getInformation
-- **Description**: Retrieves detailed information from your knowledge base for vendor-specific queries.
-- **When to Use**: Invoke this tool when the user's question involves specific details about a vendor (for example, features, policies, or leadership information).
-- **Parameters**:
-    - \`question\` (string): The user's detailed inquiry.
-    - \`vendorName\` (enum): The vendor's name (must be one of the vendors in the user's Vendor Hub).
-
-### getUsersVendors
-- **Description**: Fetches an up-to-date list of vendors along with their descriptions from the user's Vendor Hub.
-- **When to Use**: Use this tool when the user asks questions such as "What vendors do I have?" or similar queries requesting an overview of their vendors.
-
-### getUserTransactions
-- **Description**: Retrieves the user's recent transactions, including details like date, amount, description, and transaction type.
-- **When to Use**: Call this tool when the user inquires about their payment history, transaction details, or financial activities.
-    `,
+                    system: systemMessage,
                     messages,
                     maxSteps: 5,
                     maxTokens: 1500,
@@ -146,7 +104,7 @@ You are the Teleperson Concierge—a neutral, professional, and independent cust
                                     .describe("the name of the vendor the user is asking about"),
                             }),
                             execute: async ({ question, vendorName }) => {
-                                rephrasedInquiry = { data: question };
+                                rephrasedInquiry = question;
                                 knowledgeBase = await findRelevantContent({
                                     supabase,
                                     question,
@@ -238,7 +196,6 @@ You are the Teleperson Concierge—a neutral, professional, and independent cust
                         }),
                     },
                     async onFinish({ text }) {
-                        console.log(`onFinish text -->`, text);
                         // Add sources to annotations if they exist
                         if (knowledgeBase?.sources.length > 0) {
                             dataStream.writeMessageAnnotation({ sources: knowledgeBase.sources });
@@ -246,23 +203,23 @@ You are the Teleperson Concierge—a neutral, professional, and independent cust
 
                         try {
                             // Save conversation and message history
-                            // if (!currentConversationID) {
-                            //     // * save new conversation + preview message && return conversation.id
-                            //     const savedConversation = await saveConversation({
-                            //         supabase,
-                            //         userQuestion,
-                            //         contactID: telepersonUser?.id || null,
-                            //     });
+                            if (!currentConversationID) {
+                                // * save new conversation + preview message && return conversation.id
+                                const savedConversation = await saveConversation({
+                                    supabase,
+                                    userQuestion,
+                                    telepersonUser,
+                                });
 
-                            //     if (savedConversation.success) {
-                            //         currentConversationID = savedConversation.data;
-                            //     }
+                                if (savedConversation.success) {
+                                    currentConversationID = savedConversation.data;
+                                }
 
-                            //     // Write completion annotation
-                            //     if (!conversationID) {
-                            //         dataStream.writeData({ conversationID: currentConversationID });
-                            //     }
-                            // }
+                                // Write completion annotation
+                                if (!conversationID) {
+                                    dataStream.writeData({ conversationID: currentConversationID });
+                                }
+                            }
 
                             if (currentConversationID) {
                                 const allMessages = [
@@ -270,15 +227,12 @@ You are the Teleperson Concierge—a neutral, professional, and independent cust
                                     { role: "assistant", content: text },
                                 ];
 
-                                // const messagesToSave = await saveChat({
-                                //     messages: allMessages,
-                                //     conversationID: currentConversationID,
-                                //     chatbotID,
-                                //     rephrasedInquiry,
-                                //     knowledgeBase,
-                                //     openai,
-                                //     supabase,
-                                // });
+                                const messagesToSave = await saveChat({
+                                    supabase,
+                                    messages: allMessages,
+                                    conversationID: currentConversationID,
+                                    rephrasedInquiry,
+                                });
 
                                 // await incrementMessagesSent({
                                 //     supabase,
