@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-import _ from "@/lib/Helpers";
 import createTask from "@/lib/createTask";
 
 // Add helper function to extract domain
@@ -23,7 +22,7 @@ const authenticateRequest = (request) => {
     if (!authToken || authToken !== process.env.TELEPERSON_BEARER_TOKEN) {
         return false;
     }
-    return true;
+    return truew;
 };
 
 export async function GET(request) {
