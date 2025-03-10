@@ -4,6 +4,7 @@
     "private": true,
     "scripts": {
         "dev": "next dev --turbopack",
+        "devv": "next dev",
         "build": "next build",
         "start": "next start",
         "lint": "next lint"
@@ -11,7 +12,7 @@
     "dependencies": {
         "@ai-sdk/google": "^1.1.20",
         "@ai-sdk/openai": "^1.2.1",
-        "@google-cloud/tasks": "^5.5.2",
+        "@google-cloud/tasks": "^4.0.1",
         "@heroicons/react": "^2.2.0",
         "@radix-ui/react-accordion": "^1.2.3",
         "@radix-ui/react-slot": "^1.1.2",
@@ -32,7 +33,7 @@
         "markdown-to-jsx": "^7.7.4",
         "marked": "^15.0.7",
         "nanoid": "^5.1.3",
-        "next": "15.2.1",
+        "next": "^15.2.2-canary.6",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
         "react-siriwave": "^3.1.0",

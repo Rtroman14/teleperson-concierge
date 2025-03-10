@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-import createTask from "@/lib/createTask";
+import { createTask } from "@/lib/createTask";
 
 // Add helper function to extract domain
 const extractDomain = (urlString) => {

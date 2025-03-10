@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import slackNotification from "@/lib/slackNotification";
 
 import _ from "@/lib/Helpers";
-// import createTask from "@/lib/createTask";
+// import { createTask } from "@/lib/createTask";
 
 // Add auth middleware
 const authenticateRequest = (request) => {
