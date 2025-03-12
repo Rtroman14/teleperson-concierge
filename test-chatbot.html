@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            body,
+            html {
+                height: 100%;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .centered-div {
+                text-align: center;
+            }
+            iframe {
+                width: 500px;
+                height: 800px;
+                border-radius: 14px;
+            }
+        </style>
+
+        <script type="text/javascript">
+            // Define the user email you want to send
+            const email = "jesse@teleperson.com"; // This would be your actual email
+
+            (function () {
+                d = document;
+                s = d.createElement("script");
+                // s.src = "http://localhost:3000/api/chatbot/fb0b48ba-9449-4e83-bc51-43e2651e3e16";
+                s.src = "http://localhost:3000/api/chatbot";
+                s.async = 1;
+                d.getElementsByTagName("head")[0].appendChild(s);
+            })();
+
+            // Function to send message to iframe
+            const sendUserEmailToChat = () => {
+                const chatbotIframe = document.querySelector("#teleperson-iframe");
+                if (chatbotIframe) {
+                    chatbotIframe.contentWindow.postMessage(
+                        {
+                            type: "SET_USER_EMAIL",
+                            email: email,
+                        },
+                        "http://localhost:3000" // target origin
+                        // "https://webagent.ai"
+                    );
+                } else {
+                    console.log("Chatbot iframe not found");
+                }
+            };
+        </script>
+    </head>
+    <body>
+        <div class="centered-div">
+            <button
+                onclick="sendUserEmailToChat()"
+                style="
+                    padding: 10px 20px;
+                    margin-bottom: 20px;
+                    background-color: #4caf50;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                "
+            >
+                Send User ID to Chatbot
+            </button>
+        </div>
+    </body>
+</html>
