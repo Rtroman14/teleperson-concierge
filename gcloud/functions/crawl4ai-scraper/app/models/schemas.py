@@ -13,6 +13,7 @@ class ScrapeResult(BaseModel):
     content: Optional[str]
     title: Optional[str]
     success: bool
+    description: Optional[str]
 
 class ScrapeResponse(BaseModel):
     success: bool
@@ -23,6 +24,7 @@ class CrawlLinksRequest(BaseModel):
     url: str
     max_depth: Optional[int] = 2
     excluded_patterns: Optional[List[str]] = None
+    vendor_id: int
 
 class CrawlLinksResult(BaseModel):
     url: str
@@ -34,4 +36,19 @@ class CrawlLinksResult(BaseModel):
 class CrawlLinksResponse(BaseModel):
     success: bool
     links: List[str]
+    message: Optional[str] = None
+
+class DeepCrawlRequest(BaseModel):
+    url: str
+    max_depth: Optional[int] = 2
+    excluded_patterns: Optional[List[str]] = None
+
+class DeepCrawlResult(BaseModel):
+    url: str
+    title: Optional[str]
+    description: Optional[str]
+
+class DeepCrawlResponse(BaseModel):
+    success: bool
+    data: List[DeepCrawlResult]
     message: Optional[str] = None 

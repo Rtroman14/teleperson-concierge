@@ -11,12 +11,25 @@ import { chunkEmbedInsert } from "./src/documentProcessing.js";
 import { handleFailedScrapes } from "./src/retryHandler.js";
 
 functions.http("scrape-and-embed", async (req, res) => {
-    const { webPages, vendor = null, retries = 0 } = req.body;
+    const { webPages, vendor, retries = 0 } = req.body;
     const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PRIVATE_KEY, {
         auth: { persistSession: false },
     });
 
     try {
+        // Update web_pages with status = "Training" and increment num_attempts
+        await Promise.all(
+            webPages.map((page) =>
+                supabase
+                    .from("web_pages")
+                    .update({
+                        status: "Training",
+                        num_attempts: page.num_attempts + retries + 1,
+                    })
+                    .eq("id", page.id)
+            )
+        );
+
         const scrapeResult = await scrapeInnerText({ webPages, vendor });
 
         if (!scrapeResult.success) {
@@ -72,7 +85,21 @@ functions.http("scrape-and-embed", async (req, res) => {
             data: req.body,
         });
     } catch (error) {
-        console.error(error.message);
+        console.error(error);
+
+        // Update web_pages with status = "Error" and error_message
+        await Promise.all(
+            webPages.map((page) =>
+                supabase
+                    .from("web_pages")
+                    .update({
+                        status: "Error",
+                        error_message: error.message,
+                        num_attempts: page.num_attempts + retries + 1,
+                    })
+                    .eq("id", page.id)
+            )
+        );
 
         await slackNotification({
             username: "Scrape and Embed (Teleperson)",

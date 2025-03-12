@@ -47,7 +47,7 @@ async function chunkEmbedInsert({ succeededScrape, pipe, supabase, vendor }) {
 
             docData.vendor_id = vendor.id;
             docData.vendor_name = vendor.name;
-            docData.web_pages_id = succeededScrape.id;
+            docData.web_page_id = succeededScrape.id;
 
             newDocs.push(docData);
         }
