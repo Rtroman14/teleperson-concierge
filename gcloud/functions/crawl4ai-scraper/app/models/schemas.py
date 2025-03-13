@@ -42,6 +42,7 @@ class DeepCrawlRequest(BaseModel):
     url: str
     max_depth: Optional[int] = 2
     excluded_patterns: Optional[List[str]] = None
+    vendor_id: int
 
 class DeepCrawlResult(BaseModel):
     url: str

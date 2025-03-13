@@ -78,6 +78,7 @@ async def deep_crawl_route(request: DeepCrawlRequest):
     try:
         results, has_errors = await deep_crawl_website(
             request.url,
+            vendor_id=request.vendor_id,
             max_depth=request.max_depth,
             excluded_patterns=request.excluded_patterns
         )

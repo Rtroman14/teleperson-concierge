@@ -24,7 +24,7 @@ async def process_crawl_result(crawl_data: Dict) -> None:
         # For example:
         # await supabase_client.from('crawled_urls').insert(crawl_data)
 
-async def deep_crawl_website(start_url: str, max_depth: int = 2, excluded_patterns: List[str] = None) -> Tuple[List[Dict], bool]:
+async def deep_crawl_website(start_url: str, vendor_id: int, max_depth: int = 2, excluded_patterns: List[str] = None) -> Tuple[List[Dict], bool]:
     """
     Crawl a website starting from a URL and collect all unique internal links up to a maximum depth.
     Uses streaming to process results as they come in.
