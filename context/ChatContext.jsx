@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { useChat } from "ai/react";
 import Vapi from "@vapi-ai/web";
 import { nanoid } from "@/lib/utils";
-import { getSystemMessage, getVapiAssistantConfig } from "@/lib/agent-settings";
+import { getVapiAssistantConfig } from "@/lib/agent-settings";
 
 const ChatContext = createContext({});
 

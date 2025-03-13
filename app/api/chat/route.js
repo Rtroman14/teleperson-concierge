@@ -77,6 +77,10 @@ export async function POST(req) {
             firstName: telepersonUser.firstName,
             vendors,
             previousConversations,
+            guidelines: [
+                "- **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.",
+                "- **Formatting**: Use markdown formatting, lists, and clear sections to organize your response.",
+            ],
         });
 
         // Return data stream response with annotations and status updates
