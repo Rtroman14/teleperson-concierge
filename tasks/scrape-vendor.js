@@ -13,8 +13,8 @@ const supabase = createClient(
 );
 
 const body = {
-    companyName: "American Family Insurance",
-    websiteURL: "https://www.amfam.com/",
+    companyName: "Clarios, LLC",
+    websiteURL: "https://www.clarios.com/",
 };
 
 (async () => {

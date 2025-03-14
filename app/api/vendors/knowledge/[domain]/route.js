@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import _ from "@/lib/Helpers";
 
 export async function GET(request, { params }) {
-    const { domain } = params;
+    const { domain } = await params;
 
     if (!domain) {
         return NextResponse.json(
@@ -20,7 +20,7 @@ export async function GET(request, { params }) {
             );
         }
 
-        const supabase = await createClient(
+        const supabase = createClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL,
             process.env.SUPABASE_SERVICE_KEY,
             { auth: { persistSession: false } }
@@ -41,26 +41,26 @@ export async function GET(request, { params }) {
         // Get counts for each status
         const counts = await Promise.all([
             supabase
-                .from("teleperson_web_pages")
+                .from("web_pages")
                 .select("id, status", { count: "exact" })
                 .eq("vendor_id", vendor.id),
             supabase
-                .from("teleperson_web_pages")
+                .from("web_pages")
                 .select("id, status", { count: "exact" })
                 .eq("vendor_id", vendor.id)
                 .eq("status", "Staging"),
             supabase
-                .from("teleperson_web_pages")
+                .from("web_pages")
                 .select("id, status", { count: "exact" })
                 .eq("vendor_id", vendor.id)
                 .eq("status", "Training"),
             supabase
-                .from("teleperson_web_pages")
+                .from("web_pages")
                 .select("id, status", { count: "exact" })
                 .eq("vendor_id", vendor.id)
                 .eq("status", "Trained"),
             supabase
-                .from("teleperson_web_pages")
+                .from("web_pages")
                 .select("id, status", { count: "exact" })
                 .eq("vendor_id", vendor.id)
                 .eq("status", "Error"),
