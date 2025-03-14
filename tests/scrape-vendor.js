@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import _ from "../lib/Helpers.js";
 import { createClient } from "@supabase/supabase-js";
 import axios from "axios";
-import TelepersonAPIs from "../lib/teleperson-apis.js";
+// import TelepersonAPIs from "../lib/teleperson-apis.js";
 
 dotenv.config({ path: ".env.local" });
 
@@ -13,8 +13,8 @@ const supabase = createClient(
 );
 
 const body = {
-    companyName: "Generac Power Systems, Inc",
-    websiteURL: "https://www.generac.com/",
+    companyName: "American Family Insurance",
+    websiteURL: "https://www.amfam.com/",
 };
 
 (async () => {
