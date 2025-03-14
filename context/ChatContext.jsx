@@ -416,6 +416,7 @@ export function ChatProvider({ children, ...props }) {
             "UW Credit Union",
             "Badger Meter",
             "Lands' End",
+            "Clarios, LLC",
         ];
         vendors = [...vendors, ...testVendors];
 
