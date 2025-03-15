@@ -39,6 +39,7 @@ export async function POST(req) {
         "Lands' End",
         "Clarios, LLC",
         "Generac Power Systems",
+        "Rockline Industries",
     ];
     vendors = [...vendors, ...testVendors];
 
