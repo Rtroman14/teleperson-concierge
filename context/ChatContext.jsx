@@ -417,6 +417,7 @@ export function ChatProvider({ children, ...props }) {
             "Badger Meter",
             "Lands' End",
             "Clarios, LLC",
+            "Generac Power Systems",
         ];
         vendors = [...vendors, ...testVendors];
 

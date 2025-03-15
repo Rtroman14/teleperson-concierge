@@ -9,7 +9,7 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const vendorID = 15;
+const vendorID = 9;
 
 (async () => {
     try {
