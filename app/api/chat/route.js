@@ -31,7 +31,15 @@ export async function POST(req) {
     let currentConversationID = conversationID;
 
     let vendors = telepersonUser.vendors || [];
-    const testVendors = ["TruStage", "Teleperson", "UW Credit Union", "Badger Meter"];
+    const testVendors = [
+        "TruStage",
+        "Teleperson",
+        "UW Credit Union",
+        "Badger Meter",
+        "Lands' End",
+        "Clarios, LLC",
+        "Generac Power Systems",
+    ];
     vendors = [...vendors, ...testVendors];
 
     try {
