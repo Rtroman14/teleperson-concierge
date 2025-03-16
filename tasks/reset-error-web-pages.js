@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-import { createClient } from "@supabase/supabase-js";
+const dotenv = require("dotenv");
+const { createClient } = require("@supabase/supabase-js");
 
 dotenv.config({ path: ".env.local" });
 
@@ -9,17 +9,17 @@ const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const vendorID = 9;
+// const vendorID = 9;
 
 (async () => {
     try {
-        if (vendorID === null) throw new Error("VENDOR ID IS NULL");
+        // if (vendorID === null) throw new Error("VENDOR ID IS NULL");
 
         // * fetch all urls where web_pages.vendor_id === vendorID && status !== Staging
         const webPages = await supabase
             .from("web_pages")
             .select("id, url, vendor_id")
-            .eq("vendor_id", vendorID)
+            // .eq("vendor_id", vendorID)
             .eq("status", "Error");
         if (webPages.error) throw new Error(webPages.error.message);
         console.log(`There are ${webPages.data.length} web pages`);

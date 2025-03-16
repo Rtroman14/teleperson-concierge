@@ -13,8 +13,8 @@ const supabase = createClient(
 );
 
 const body = {
-    companyName: "Rockline Industries",
-    websiteURL: "https://www.rocklineind.com/",
+    companyName: "Exact Sciences Cooporation",
+    websiteURL: "https://www.exactsciences.com/",
 };
 
 (async () => {
@@ -54,6 +54,7 @@ const body = {
             // Try to fetch URLs from sitemap
             let urls = [];
             const sitemapSlugs = [
+                // "sitemap-en.xml",
                 "sitemap.xml",
                 "sitemap_index.xml",
                 "sitemap-index.xml",
@@ -89,6 +90,11 @@ const body = {
                     `Initiated deep crawl for vendor ${upsertedVendor.id} at ${normalizedURL}`
                 );
             }
+
+            // * remove urls
+            // if (urls.length) {
+            //     urls = urls.filter((url) => !url.includes("news-events"));
+            // }
 
             // Continue with remaining URLs from sitemap
             // Insert URLs in batches of 500

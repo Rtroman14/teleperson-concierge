@@ -419,6 +419,7 @@ export function ChatProvider({ children, ...props }) {
             "Clarios, LLC",
             "Generac Power Systems",
             "Rockline Industries",
+            "Exact Sciences Cooporation",
         ];
         vendors = [...vendors, ...testVendors];
 
