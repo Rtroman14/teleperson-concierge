@@ -63,13 +63,13 @@ export default function Header({
                 </div>
             </div>
 
-            <div className="absolute right-0 top-0 transform p-3 sm:hidden">
+            <div className="absolute right-0 top-0 transform p-3 xs:hidden">
                 <div className="flex gap-3">
                     <button
                         id="webagent-close-chatbot"
                         aria-label="Close Chat"
                         onClick={closeChatbot}
-                        className="block rounded-lg duration-200 hover:scale-125 sm:hidden"
+                        className="block rounded-lg duration-200 hover:scale-125 xs:hidden"
                     >
                         <X size="24" color={textColor} />
                     </button>
