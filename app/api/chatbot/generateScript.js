@@ -142,8 +142,8 @@ module.exports = ({
             document.head.insertAdjacentHTML("beforeend", styles);
 
             const iframe = document.createElement('iframe');
-            iframe.src = "http://localhost:3000/";
-            // iframe.src = "https://teleperson.webagent.ai/";
+            // iframe.src = "http://localhost:3000/";
+            iframe.src = "https://teleperson.webagent.ai/";
             iframe.id = 'teleperson-iframe';
             iframe.title = 'Teleperson Concierge';
 
