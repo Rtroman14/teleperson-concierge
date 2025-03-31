@@ -96,7 +96,9 @@ export function ChatProvider({ children, ...props }) {
     });
 
     useEffect(() => {
-        fetchTelepersonUserData("jesse@teleperson.com");
+        if (telepersonUser.email !== "jesse@teleperson.com") {
+            fetchTelepersonUserData("jesse@teleperson.com");
+        }
     }, []);
     // * Load teleperson user from localStorage on initial render
     // useEffect(() => {
@@ -172,7 +174,6 @@ export function ChatProvider({ children, ...props }) {
     useEffect(() => {
         const handleMessage = async (event) => {
             console.log(`handleMessage event -->`, event);
-            console.log(`handleMessage event -->`, JSON.stringify(event));
             // Accept messages from allowed domains
             const allowedOrigins = ["teleperson.com", "http://127.0.0.1:5500"];
             if (!allowedOrigins.includes(event.origin)) return;
