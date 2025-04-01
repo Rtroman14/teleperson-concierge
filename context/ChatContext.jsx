@@ -175,8 +175,20 @@ export function ChatProvider({ children, ...props }) {
         const handleMessage = async (event) => {
             console.log(`handleMessage event -->`, event);
             // Accept messages from allowed domains
-            const allowedOrigins = ["teleperson.com", "http://127.0.0.1:5500"];
-            if (!allowedOrigins.includes(event.origin)) return;
+            const allowedOrigins = [
+                "https://rdev.teleperson.com",
+                "http://rdev.teleperson.com",
+                "https://app.teleperson.com",
+                "http://app.teleperson.com",
+                "https://teleperson.com",
+                "http://teleperson.com",
+                "http://127.0.0.1:5500",
+            ];
+
+            if (!allowedOrigins.includes(event.origin)) {
+                console.log(`Rejected message from unauthorized origin: ${event.origin}`);
+                return;
+            }
 
             if (event.data?.type === "SET_USER_EMAIL") {
                 const email = event.data.email;
