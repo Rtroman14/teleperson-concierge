@@ -103,7 +103,7 @@ export function ChatProvider({ children, ...props }) {
 
     // * Load teleperson user from sessionStorage on initial render
     useEffect(() => {
-        const storedTelepersonUser = sessionStorage.getItem("wa-tc-user");
+        const storedTelepersonUser = localStorage.getItem("wa-tc-user");
 
         if (storedTelepersonUser) {
             try {
@@ -111,7 +111,7 @@ export function ChatProvider({ children, ...props }) {
                 setTelepersonUser(parsedUser);
             } catch (error) {
                 console.error("Error parsing teleperson user from sessionStorage:", error);
-                sessionStorage.removeItem("wa-tc-user");
+                localStorage.removeItem("wa-tc-user");
             }
         } else {
             // ! DELETE THIS IN PRODUCTION
@@ -149,7 +149,7 @@ export function ChatProvider({ children, ...props }) {
 
             // Only save to sessionStorage if we have a valid ID
             if (formattedUser.id) {
-                sessionStorage.setItem("wa-tc-user", JSON.stringify(formattedUser));
+                localStorage.setItem("wa-tc-user", JSON.stringify(formattedUser));
                 setTelepersonUser(formattedUser);
             }
 
@@ -244,7 +244,7 @@ export function ChatProvider({ children, ...props }) {
     }, [isLoading]);
 
     useEffect(() => {
-        let storedChatUser = sessionStorage.getItem("wa-tc-user");
+        let storedChatUser = localStorage.getItem("wa-tc-user");
         let storedConversationID = sessionStorage.getItem("wa-tc-conversationID");
 
         const updatedData = {};
@@ -258,7 +258,7 @@ export function ChatProvider({ children, ...props }) {
             } catch (error) {
                 console.error("Error parsing stored user data:", error);
                 // Only remove if there's an actual parsing error
-                sessionStorage.removeItem("wa-tc-user");
+                localStorage.removeItem("wa-tc-user");
             }
         }
 
