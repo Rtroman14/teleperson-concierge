@@ -139,7 +139,7 @@ export function ChatProvider({ children, ...props }) {
 
             // Format user data
             const formattedUser = {
-                id: userData.user.id,
+                id: userData.user.id || "",
                 email: userData.user.email,
                 name: `${userData.user.firstName} ${userData.user.lastName}`,
                 firstName: userData.user.firstName,
@@ -147,9 +147,11 @@ export function ChatProvider({ children, ...props }) {
                 vendors: userData.vendors.map((vendor) => vendor.companyName),
             };
 
-            // Save to sessionStorage and update state
-            sessionStorage.setItem("wa-tc-user", JSON.stringify(formattedUser));
-            setTelepersonUser(formattedUser);
+            // Only save to sessionStorage if we have a valid ID
+            if (formattedUser.id) {
+                sessionStorage.setItem("wa-tc-user", JSON.stringify(formattedUser));
+                setTelepersonUser(formattedUser);
+            }
 
             // Fetch previous conversations if we have a user ID
             if (formattedUser.id) {
@@ -174,7 +176,7 @@ export function ChatProvider({ children, ...props }) {
     // * receive teleperson user ID
     useEffect(() => {
         const handleMessage = async (event) => {
-            console.log(`handleMessage event -->`, event);
+            // console.log(`handleMessage event -->`, event);
             // Accept messages from allowed domains
             const allowedOrigins = [
                 "https://teleperson.webagent.ai",
@@ -247,10 +249,15 @@ export function ChatProvider({ children, ...props }) {
 
         const updatedData = {};
         if (storedChatUser) {
-            storedChatUser = JSON.parse(storedChatUser);
-            if (storedChatUser.id !== "" && storedChatUser.chatbots_id === chatbotSettings.id) {
-                updatedData.chatUser = storedChatUser;
-            } else {
+            try {
+                storedChatUser = JSON.parse(storedChatUser);
+                // Only update data if we have valid user data
+                if (storedChatUser && typeof storedChatUser === "object") {
+                    updatedData.chatUser = storedChatUser;
+                }
+            } catch (error) {
+                console.error("Error parsing stored user data:", error);
+                // Only remove if there's an actual parsing error
                 sessionStorage.removeItem("wa-tc-user");
             }
         }
