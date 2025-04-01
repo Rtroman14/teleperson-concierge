@@ -176,6 +176,8 @@ export function ChatProvider({ children, ...props }) {
             console.log(`handleMessage event -->`, event);
             // Accept messages from allowed domains
             const allowedOrigins = [
+                "https://teleperson.webagent.ai",
+                "http://teleperson.webagent.ai",
                 "https://rdev.teleperson.com",
                 "http://rdev.teleperson.com",
                 "https://app.teleperson.com",
