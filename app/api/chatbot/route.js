@@ -3,23 +3,9 @@ import { colord } from "colord";
 import { createClient } from "@/lib/supabase/admin";
 
 import generateScript from "./generateScript";
-import { headers } from "next/headers";
 
 export async function GET(request) {
     const id = "fb0b48ba-9449-4e83-bc51-43e2651e3e16";
-
-    const headersList = headers();
-
-    const referer = headersList.get("referer");
-    let domain = null;
-
-    try {
-        // extract domain from referer
-        domain = new URL(referer).hostname;
-    } catch (error) {
-        // Set domain to null
-        domain = null;
-    }
 
     try {
         const supabase = await createClient();

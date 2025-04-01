@@ -90,34 +90,35 @@ export function ChatProvider({ children, ...props }) {
             if (newConversationID && newConversationID !== conversationID) {
                 setConversationID(newConversationID);
 
-                sessionStorage.setItem("wa-conversationID", newConversationID);
+                sessionStorage.setItem("wa-tc-conversationID", newConversationID);
             }
         },
     });
 
-    useEffect(() => {
-        if (telepersonUser.email !== "jesse@teleperson.com") {
-            fetchTelepersonUserData("jesse@teleperson.com");
-        }
-    }, []);
-    // * Load teleperson user from localStorage on initial render
     // useEffect(() => {
-    //     const storedTelepersonUser = localStorage.getItem("teleperson-user");
-
-    //     if (storedTelepersonUser) {
-    //         try {
-    //             const parsedUser = JSON.parse(storedTelepersonUser);
-    //             setTelepersonUser(parsedUser);
-    //         } catch (error) {
-    //             console.error("Error parsing teleperson user from localStorage:", error);
-    //             localStorage.removeItem("teleperson-user");
-    //         }
-    //     } else {
-    //         // ! DELETE THIS IN PRODUCTION
-    //         // If no user in localStorage, fetch with default email for development
+    //     if (telepersonUser.email !== "jesse@teleperson.com") {
     //         fetchTelepersonUserData("jesse@teleperson.com");
     //     }
     // }, []);
+
+    // * Load teleperson user from sessionStorage on initial render
+    useEffect(() => {
+        const storedTelepersonUser = sessionStorage.getItem("wa-tc-user");
+
+        if (storedTelepersonUser) {
+            try {
+                const parsedUser = JSON.parse(storedTelepersonUser);
+                setTelepersonUser(parsedUser);
+            } catch (error) {
+                console.error("Error parsing teleperson user from sessionStorage:", error);
+                sessionStorage.removeItem("wa-tc-user");
+            }
+        } else {
+            // ! DELETE THIS IN PRODUCTION
+            // If no user in sessionStorage, fetch with default email for development
+            // fetchTelepersonUserData("jesse@teleperson.com");
+        }
+    }, []);
 
     // * Fetch user data and vendors from Teleperson API
     const fetchTelepersonUserData = async (email) => {
@@ -146,8 +147,8 @@ export function ChatProvider({ children, ...props }) {
                 vendors: userData.vendors.map((vendor) => vendor.companyName),
             };
 
-            // Save to localStorage and update state
-            localStorage.setItem("teleperson-user", JSON.stringify(formattedUser));
+            // Save to sessionStorage and update state
+            sessionStorage.setItem("wa-tc-user", JSON.stringify(formattedUser));
             setTelepersonUser(formattedUser);
 
             // Fetch previous conversations if we have a user ID
@@ -195,8 +196,6 @@ export function ChatProvider({ children, ...props }) {
             if (event.data?.type === "SET_USER_EMAIL") {
                 const email = event.data.email;
 
-                // TODO: add email validation check?
-
                 // Check if we need to fetch new user data
                 if (!telepersonUser || telepersonUser.email !== email) {
                     // Fetch complete user data including vendors
@@ -228,8 +227,8 @@ export function ChatProvider({ children, ...props }) {
     }, [telepersonUser]);
 
     const handleRefresh = () => {
-        sessionStorage.setItem("wa-thread", JSON.stringify(initialMessages));
-        sessionStorage.removeItem("wa-conversationID");
+        sessionStorage.setItem("wa-tc-thread", JSON.stringify(initialMessages));
+        sessionStorage.removeItem("wa-tc-conversationID");
 
         setMessages(initialMessages);
         setData(undefined);
@@ -238,13 +237,13 @@ export function ChatProvider({ children, ...props }) {
 
     useEffect(() => {
         if (!isLoading && messages.length > props.initialMessages.length) {
-            sessionStorage.setItem("wa-thread", JSON.stringify(messages));
+            sessionStorage.setItem("wa-tc-thread", JSON.stringify(messages));
         }
     }, [isLoading]);
 
     useEffect(() => {
-        let storedChatUser = localStorage.getItem("wa-user");
-        let storedConversationID = sessionStorage.getItem("wa-conversationID");
+        let storedChatUser = sessionStorage.getItem("wa-tc-user");
+        let storedConversationID = sessionStorage.getItem("wa-tc-conversationID");
 
         const updatedData = {};
         if (storedChatUser) {
@@ -252,7 +251,7 @@ export function ChatProvider({ children, ...props }) {
             if (storedChatUser.id !== "" && storedChatUser.chatbots_id === chatbotSettings.id) {
                 updatedData.chatUser = storedChatUser;
             } else {
-                localStorage.removeItem("wa-user");
+                sessionStorage.removeItem("wa-tc-user");
             }
         }
 
@@ -264,7 +263,7 @@ export function ChatProvider({ children, ...props }) {
             setData(updatedData);
         }
 
-        let thread = sessionStorage.getItem("wa-thread");
+        let thread = sessionStorage.getItem("wa-tc-thread");
         if (thread) {
             thread = JSON.parse(thread);
         }
@@ -280,7 +279,7 @@ export function ChatProvider({ children, ...props }) {
         if (conversationID !== data?.conversationID && data?.conversationID) {
             setConversationID(data.conversationID);
 
-            sessionStorage.setItem("wa-conversationID", data.conversationID);
+            sessionStorage.setItem("wa-tc-conversationID", data.conversationID);
         }
     }, [data?.conversationID]);
 

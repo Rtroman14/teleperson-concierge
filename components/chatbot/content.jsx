@@ -29,7 +29,7 @@ const Content = memo(function Content({
 
     // useEffect(() => {
     //     if (!conversationID && disclaimer.display) {
-    //         const showDisclaimer = sessionStorage.getItem("wa-display-disclaimer") !== "false";
+    //         const showDisclaimer = sessionStorage.getItem("wa-tc-display-disclaimer") !== "false";
 
     //         if (showDisclaimer) {
     //             setTimeout(() => {
@@ -39,7 +39,7 @@ const Content = memo(function Content({
     //                     id: "disclaimer-toast",
     //                 });
 
-    //                 sessionStorage.setItem("wa-display-disclaimer", "false");
+    //                 sessionStorage.setItem("wa-tc-display-disclaimer", "false");
     //             }, 2000);
     //         }
     //     }
