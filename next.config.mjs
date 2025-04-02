@@ -15,6 +15,12 @@ const nextConfig = {
             },
         ],
     },
+    webpack: (config, { isServer }) => {
+        if (isServer) {
+            config.externals = [...(config.externals || []), "@google-cloud/tasks"];
+        }
+        return config;
+    },
 };
 
 export default nextConfig;
