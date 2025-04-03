@@ -191,7 +191,7 @@ export function ChatProvider({ children, ...props }) {
             ];
 
             if (!allowedOrigins.includes(event.origin)) {
-                console.log(`Rejected message from unauthorized origin: ${event.origin}`);
+                // console.log(`Rejected message from unauthorized origin: ${event.origin}`);
                 return;
             }
 
