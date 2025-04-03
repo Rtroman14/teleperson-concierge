@@ -37,16 +37,12 @@ const vendorData = {
     companyOverview: "Description of the company",
 };
 
-const response = await axios.post(
-    "https://teleperson.webagent.ai/api/vendors/register",
-    vendorData,
-    {
-        headers: {
-            Authorization: "Bearer YOUR_TOKEN",
-            "Content-Type": "application/json",
-        },
-    }
-);
+const response = await axios.post("https://webagent.ai/api/vendors/register", vendorData, {
+    headers: {
+        Authorization: "Bearer YOUR_TOKEN",
+        "Content-Type": "application/json",
+    },
+});
 ```
 
 **Success Response:**
@@ -85,7 +81,7 @@ Retrieve training statistics for a specific vendor.
 ```javascript
 const axios = require("axios");
 
-const response = await axios.get("https://teleperson.webagent.ai/api/vendors/knowledge/123", {
+const response = await axios.get("https://webagent.ai/api/vendors/knowledge/123", {
     headers: {
         Authorization: "Bearer YOUR_TOKEN",
     },
