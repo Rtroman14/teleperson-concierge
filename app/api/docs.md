@@ -8,31 +8,88 @@ All endpoints require Bearer token authentication. Include the following header 
 Authorization: Bearer
 ```
 
-## Endpoints
+### 1. Register Vendor
 
-### 1. Get Vendor Knowledge Statistics
+Register a new vendor in the system.
 
-Retrieve training statistics for a specific vendor domain.
+**Endpoint:** POST /api/vendors/register
 
-**Endpoint:** GET /api/teleperson/vendors/knowledge/{domain}
+**Request Body:**
 
-**Parameters:**
-
--   domain: The vendor's domain (e.g., "example.com")
+```json
+{
+    "id": 4,
+    "companyName": "Example Corp",
+    "websiteURL": "example.com",
+    "companyOverview": "Description of the company"
+}
+```
 
 **Example Request:**
 
 ```javascript
 const axios = require("axios");
 
-const response = await axios.get(
-    "https://webagent.ai/api/teleperson/vendors/knowledge/example.com",
+const vendorData = {
+    id: 4,
+    companyName: "Example Corp",
+    websiteURL: "example.com",
+    companyOverview: "Description of the company",
+};
+
+const response = await axios.post(
+    "https://teleperson.webagent.ai/api/vendors/register",
+    vendorData,
     {
         headers: {
-            Authorization: "Bearer ",
+            Authorization: "Bearer YOUR_TOKEN",
+            "Content-Type": "application/json",
         },
     }
 );
+```
+
+**Success Response:**
+
+```json
+{
+    "success": true,
+    "message": "Vendor processed successfully",
+    "data": {
+        "vendor": {
+            "id": "uuid",
+            "teleperson_id": 4,
+            "name": "Example Corp",
+            "domain": "example.com",
+            "description": "Description of the company"
+        },
+        "urlsProcessed": 100
+    }
+}
+```
+
+## Endpoints
+
+### 2. Get Vendor Knowledge Statistics
+
+Retrieve training statistics for a specific vendor.
+
+**Endpoint:** GET /api/vendors/knowledge/{id}
+
+**Parameters:**
+
+-   id: The Teleperson vendor ID
+
+**Example Request:**
+
+```javascript
+const axios = require("axios");
+
+const response = await axios.get("https://teleperson.webagent.ai/api/vendors/knowledge/123", {
+    headers: {
+        Authorization: "Bearer YOUR_TOKEN",
+    },
+});
 ```
 
 **Success Response:**
@@ -47,43 +104,5 @@ const response = await axios.get(
         "trained_pages": 45,
         "failed_pages": 5
     }
-}
-```
-
-### 2. Register Vendor
-
-Register a new vendor in the Teleperson system.
-
-**Endpoint:** POST /api/teleperson/vendors/register
-
-**Example Request:**
-
-```javascript
-const axios = require("axios");
-
-const vendorData = {
-    id: 4,
-    companyName: "Example Corp",
-    websiteURL: "example.com",
-};
-
-const response = await axios.post(
-    "https://webagent.ai/api/teleperson/vendors/register",
-    vendorData,
-    {
-        headers: {
-            Authorization: "Bearer ",
-            "Content-Type": "application/json",
-        },
-    }
-);
-```
-
-**Success Response:**
-
-```json
-{
-    "success": true,
-    "message": "Vendor received."
 }
 ```

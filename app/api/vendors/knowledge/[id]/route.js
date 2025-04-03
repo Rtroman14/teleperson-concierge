@@ -3,11 +3,11 @@ import { createClient } from "@supabase/supabase-js";
 import _ from "@/lib/Helpers";
 
 export async function GET(request, { params }) {
-    const { domain } = await params;
+    const { id } = await params;
 
-    if (!domain) {
+    if (!id) {
         return NextResponse.json(
-            { success: false, message: "Domain parameter is required" },
+            { success: false, message: "ID parameter is required" },
             { status: 400 }
         );
     }
@@ -30,12 +30,12 @@ export async function GET(request, { params }) {
         const { data: vendor, error: vendorError } = await supabase
             .from("vendors")
             .select("id")
-            .eq("domain", domain)
+            .eq("teleperson_id", id)
             .single();
         if (vendorError) throw new Error(vendorError.message);
         if (!vendor)
             throw new Error(
-                `Domain should be structured like 'example.com'. No vendor found for domain: ${domain}`
+                `Domain should be structured like 'example.com'. No vendor found for vendor id: ${id}`
             );
 
         // Get counts for each status
