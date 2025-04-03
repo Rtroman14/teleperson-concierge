@@ -1,27 +1,28 @@
-import { NextResponse } from "next/server";
-import { createTask } from "@/lib/createTask";
+import "dotenv/config";
+
+import functions from "@google-cloud/functions-framework";
+
 import { createClient } from "@supabase/supabase-js";
+import createTask from "./src/createTask.js";
+import slackNotification from "./src/slackNotification.js";
 
-const SCRAPE_BATCH_SIZE = 3; // Number of URLs to scrape in parallel
-const DELAY_BETWEEN_TASKS = 60; // 60 seconds between tasks
-
-// Time constants for scheduling logic
+// Constants
+const SCRAPE_BATCH_SIZE = 3;
+const DELAY_BETWEEN_TASKS = 60;
 const DAYS = 3;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-const threeDaysAgo = new Date(Date.now() - DAYS * MS_PER_DAY).toISOString();
 
-export async function GET(request) {
+functions.http("create-scrape-staging-tasks", async (req, res) => {
     try {
-        const supabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_KEY,
-            { auth: { persistSession: false } }
-        );
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_PRIVATE_KEY, {
+            auth: { persistSession: false },
+        });
 
         // Fetch all pages with pagination
         let allWebPages = [];
         let page = 0;
         const PAGE_SIZE = 1000;
+        const threeDaysAgo = new Date(Date.now() - DAYS * MS_PER_DAY).toISOString();
 
         while (true) {
             const { data: webPages, error } = await supabase
@@ -36,15 +37,13 @@ export async function GET(request) {
                 throw new Error(`Error fetching web pages: ${error.message}`);
             }
 
-            if (!webPages || webPages.length === 0) {
-                break; // No more results
-            }
+            if (!webPages || webPages.length === 0) break;
 
             allWebPages = [...allWebPages, ...webPages];
             page++;
         }
 
-        // Group pages by vendor_id (using allWebPages instead of webPages)
+        // Group pages by vendor_id
         const pagesByVendor = allWebPages.reduce((acc, page) => {
             const vendorId = page.vendor_id.id;
             if (!acc[vendorId]) {
@@ -66,7 +65,6 @@ export async function GET(request) {
 
         // Process each vendor's pages
         for (const [vendorId, { vendor, pages }] of Object.entries(pagesByVendor)) {
-            // Create tasks for each batch of URLs
             for (let i = 0; i < pages.length; i += SCRAPE_BATCH_SIZE) {
                 const batchPages = pages.slice(i, i + SCRAPE_BATCH_SIZE);
                 const inSeconds = DELAY_BETWEEN_TASKS * globalTaskCount++;
@@ -90,14 +88,16 @@ export async function GET(request) {
                     );
 
                     const results = await Promise.all(updatePromises);
-
-                    // Check for any errors in the results
                     const updateErrors = results
                         .filter((result) => result.error)
                         .map((result) => result.error);
 
                     if (updateErrors.length > 0) {
                         console.error("Errors updating scheduled_at:", updateErrors);
+                        await slackNotification({
+                            username: "create-scrape-staging-tasks (Teleperson)",
+                            text: `Error updating scheduled_at: ${JSON.stringify(updateErrors)}`,
+                        });
                     }
                 }
 
@@ -105,7 +105,7 @@ export async function GET(request) {
             }
         }
 
-        return NextResponse.json({
+        return res.send({
             success: true,
             data: {
                 tasksCreated: allTasks.length,
@@ -117,13 +117,16 @@ export async function GET(request) {
             },
         });
     } catch (error) {
-        console.error("Error in scrape-staging:", error);
-        return NextResponse.json(
-            {
-                success: false,
-                message: error.message || "Failed to create scraping tasks",
-            },
-            { status: 500 }
-        );
+        console.error(error);
+
+        await slackNotification({
+            username: "create-scrape-staging-tasks (Teleperson)",
+            text: error.message,
+        });
+
+        return res.send({
+            success: false,
+            message: error.message,
+        });
     }
-}
+});
