@@ -146,6 +146,7 @@ module.exports = ({
             iframe.src = "https://teleperson.webagent.ai/";
             iframe.id = 'teleperson-iframe';
             iframe.title = 'Teleperson Concierge';
+            iframe.allow = "microphone *";
 
             const minWidth = "640";
 
