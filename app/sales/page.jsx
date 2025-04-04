@@ -48,7 +48,7 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const TELEPERSON_CHATBOT_ID = "fb0b48ba-9449-4e83-bc51-43e2651e3e16";
+const TELEPERSON_CHATBOT_ID = "e5f6ee19-c047-4391-81d0-ca3af5e9af8e";
 
 export default async function TelepersonChatbotPage() {
     const supabase = await createClient();
@@ -75,7 +75,7 @@ export default async function TelepersonChatbotPage() {
     return (
         <div>
             <TelepersonChatbot
-                environment="authenticated"
+                environment="public"
                 settings={settings}
                 initialMessages={initialMessages}
             />

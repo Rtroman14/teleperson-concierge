@@ -4,21 +4,28 @@ import ChatWidget from "./chatwidget";
 import _ from "@/lib/Helpers";
 
 import { ChatProvider, useChatContext } from "@/context/ChatContext";
+import {
+    ChatProvider as SalesChatbotProvider,
+    useChatContext as useSalesChatContext,
+} from "@/context/ChatContext.sales";
 
 export default function TelepersonChatbot({ environment, settings, initialMessages }) {
+    const Provider = environment === "public" ? SalesChatbotProvider : ChatProvider;
+
     return (
-        <ChatProvider
+        <Provider
             environment={environment}
             widgetType="ChatWidget"
             initialSettings={settings}
             initialMessages={initialMessages}
         >
-            <ChatbotContent />
-        </ChatProvider>
+            <ChatbotContent isPublic={environment === "public"} />
+        </Provider>
     );
 }
 
-function ChatbotContent() {
+function ChatbotContent({ isPublic }) {
+    const context = isPublic ? useSalesChatContext() : useChatContext();
     const {
         chatbotSettings,
         messages,
@@ -29,8 +36,7 @@ function ChatbotContent() {
         handleRefresh,
         setData,
         conversationID,
-        environment,
-    } = useChatContext();
+    } = context;
 
     return (
         <ChatWidget
@@ -54,7 +60,7 @@ function ChatbotContent() {
             handleSubmit={handleSubmit}
             input={input}
             setData={setData}
-            environment={environment}
+            isPublic={isPublic}
         />
     );
 }

@@ -10,7 +10,7 @@ Authorization: Bearer
 
 ### 1. Register Vendor
 
-Register a new vendor in the system.
+Register a new vendor in the system using their vendor ID.
 
 **Endpoint:** POST /api/vendors/register
 
@@ -18,10 +18,7 @@ Register a new vendor in the system.
 
 ```json
 {
-    "id": 4,
-    "companyName": "Example Corp",
-    "websiteURL": "example.com",
-    "companyOverview": "Description of the company"
+    "id": 4 // The unique identifier of the vendor
 }
 ```
 
@@ -32,17 +29,18 @@ const axios = require("axios");
 
 const vendorData = {
     id: 4,
-    companyName: "Example Corp",
-    websiteURL: "example.com",
-    companyOverview: "Description of the company",
 };
 
-const response = await axios.post("https://webagent.ai/api/vendors/register", vendorData, {
-    headers: {
-        Authorization: "Bearer YOUR_TOKEN",
-        "Content-Type": "application/json",
-    },
-});
+const response = await axios.post(
+    "https://teleperson.webagent.ai/api/vendors/register",
+    vendorData,
+    {
+        headers: {
+            Authorization: "Bearer YOUR_TOKEN",
+            "Content-Type": "application/json",
+        },
+    }
+);
 ```
 
 **Success Response:**
@@ -81,7 +79,7 @@ Retrieve training statistics for a specific vendor.
 ```javascript
 const axios = require("axios");
 
-const response = await axios.get("https://webagent.ai/api/vendors/knowledge/123", {
+const response = await axios.get("https://teleperson.webagent.ai/api/vendors/knowledge/{id}", {
     headers: {
         Authorization: "Bearer YOUR_TOKEN",
     },

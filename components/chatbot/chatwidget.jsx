@@ -4,6 +4,7 @@ import Header from "./header";
 import Content from "./content";
 import Footer from "./footer";
 import { cn } from "@/lib/utils";
+import SalesFooter from "./footer.sales";
 
 export default function ChatWidget({
     title,
@@ -24,16 +25,13 @@ export default function ChatWidget({
     handleSubmit,
     input,
     conversationID,
-    environment,
+    isPublic,
 }) {
     return (
         <>
             <div
                 className={cn(
-                    "chatwidget overflow-hidden shadow-xl",
-                    environment === "sandbox"
-                        ? "rounded-2xl sm:h-[82vh] sm:max-h-[780px]"
-                        : "flex h-screen flex-col overflow-y-auto",
+                    "chatwidget overflow-hidden shadow-xl flex h-screen flex-col overflow-y-auto",
                     open ? "" : "hidden",
                     darkTheme ? "bg-slate-800" : "bg-white"
                 )}
@@ -58,14 +56,25 @@ export default function ChatWidget({
                         isLoading={isLoading}
                         conversationID={conversationID}
                     />
-                    <Footer
-                        inputPlaceholder={inputPlaceholder}
-                        suggestedQuestions={suggestedQuestions}
-                        darkTheme={darkTheme}
-                        handleInputChange={handleInputChange}
-                        handleSubmit={handleSubmit}
-                        input={input}
-                    />
+                    {isPublic ? (
+                        <SalesFooter
+                            inputPlaceholder={inputPlaceholder}
+                            suggestedQuestions={suggestedQuestions}
+                            darkTheme={darkTheme}
+                            handleInputChange={handleInputChange}
+                            handleSubmit={handleSubmit}
+                            input={input}
+                        />
+                    ) : (
+                        <Footer
+                            inputPlaceholder={inputPlaceholder}
+                            suggestedQuestions={suggestedQuestions}
+                            darkTheme={darkTheme}
+                            handleInputChange={handleInputChange}
+                            handleSubmit={handleSubmit}
+                            input={input}
+                        />
+                    )}
                 </div>
             </div>
         </>
