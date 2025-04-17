@@ -31,28 +31,16 @@
             (function () {
                 d = document;
                 s = d.createElement("script");
+                // s.src = "http://localhost:3000/api/chatbot/fb0b48ba-9449-4e83-bc51-43e2651e3e16";
                 s.src = "http://localhost:3000/api/chatbot";
+                // s.src = "http://localhost:3000/api/chatbot/sales";
+                // s.src = "https://teleperson.webagent.ai/api/chatbot";
+                // s.src = "https://teleperson.webagent.ai/api/chatbot/sales";
                 s.async = 1;
                 d.getElementsByTagName("head")[0].appendChild(s);
             })();
 
-            // Set up event listener to receive messages from the iframe
-            window.addEventListener("message", function (event) {
-                // Verify the origin of the message
-                if (event.origin !== "http://localhost:3000") {
-                    // if (event.origin !== "https://teleperson.webagent.ai") {
-                    return;
-                }
-
-                // Check if the message has the expected type
-                if (event.data && event.data.type === "SET_USER_EMAIL") {
-                    console.log("Received email from chatbot:", event.data.email);
-                    // Here you can handle the email received from the chatbot
-                    // For example, store it in a variable or use it for authentication
-                }
-            });
-
-            // Function to send message to iframe (kept for backward compatibility)
+            // Function to send message to iframe
             const sendUserEmailToChat = () => {
                 const chatbotIframe = document.querySelector("#teleperson-iframe");
                 if (chatbotIframe) {
@@ -60,6 +48,39 @@
                         {
                             type: "SET_USER_EMAIL",
                             email: email,
+                        },
+                        "http://localhost:3000" // target origin
+                        // "https://teleperson.webagent.ai"
+                    );
+                } else {
+                    console.log("Chatbot iframe not found");
+                }
+            };
+
+            // Function to handle user logout
+            const handleUserLogout = () => {
+                const chatbotIframe = document.querySelector("#teleperson-iframe");
+                if (chatbotIframe) {
+                    chatbotIframe.contentWindow.postMessage(
+                        {
+                            type: "USER_LOGOUT",
+                        },
+                        "http://localhost:3000" // target origin
+                        // "https://teleperson.webagent.ai"
+                    );
+                } else {
+                    console.log("Chatbot iframe not found");
+                }
+            };
+
+            // Function to handle user details update
+            const handleUserDetailsUpdate = (userDetails) => {
+                const chatbotIframe = document.querySelector("#teleperson-iframe");
+                if (chatbotIframe) {
+                    chatbotIframe.contentWindow.postMessage(
+                        {
+                            type: "UPDATE_USER_DETAILS",
+                            userDetails: userDetails,
                         },
                         "http://localhost:3000" // target origin
                         // "https://teleperson.webagent.ai"

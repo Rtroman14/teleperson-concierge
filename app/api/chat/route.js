@@ -32,15 +32,15 @@ export async function POST(req) {
 
     let vendors = telepersonUser.vendors || [];
     const testVendors = [
-        "TruStage",
-        "Teleperson",
-        "UW Credit Union",
-        "Badger Meter",
-        "Lands' End",
-        "Clarios, LLC",
-        "Generac Power Systems",
-        "Rockline Industries",
-        "Exact Sciences Coporation",
+        // "TruStage",
+        // "Teleperson",
+        // "UW Credit Union",
+        // "Badger Meter",
+        // "Lands' End",
+        // "Clarios, LLC",
+        // "Generac Power Systems",
+        // "Rockline Industries",
+        // "Exact Sciences Coporation",
     ];
     vendors = [...vendors, ...testVendors];
 

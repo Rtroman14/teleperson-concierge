@@ -100,3 +100,97 @@ const response = await axios.get("https://teleperson.webagent.ai/api/vendors/kno
     }
 }
 ```
+
+## Chatbot Communication
+
+The following functions are used to communicate with the Teleperson chatbot iframe.
+
+### 1. Send User Email to Chat
+
+Send the user's email to the chatbot for identification.
+
+**Function:**
+
+```javascript
+const sendUserEmailToChat = () => {
+    const chatbotIframe = document.querySelector("#teleperson-iframe");
+    if (chatbotIframe) {
+        chatbotIframe.contentWindow.postMessage(
+            {
+                type: "SET_USER_EMAIL",
+                email: email,
+            },
+            "https://teleperson.webagent.ai"
+        );
+    } else {
+        console.log("Chatbot iframe not found");
+    }
+};
+```
+
+**Usage:**
+
+```javascript
+// Call the function when you want to set the user's email
+sendUserEmailToChat();
+```
+
+### 2. Handle User Logout
+
+Notify the chatbot when a user logs out.
+
+**Function:**
+
+```javascript
+const handleUserLogout = () => {
+    const chatbotIframe = document.querySelector("#teleperson-iframe");
+    if (chatbotIframe) {
+        chatbotIframe.contentWindow.postMessage(
+            {
+                type: "USER_LOGOUT",
+            },
+            "https://teleperson.webagent.ai"
+        );
+    } else {
+        console.log("Chatbot iframe not found");
+    }
+};
+```
+
+**Usage:**
+
+```javascript
+// Call the function when the user logs out
+handleUserLogout();
+```
+
+### 3. Handle User Details Update
+
+Update the chatbot with new user details.
+
+**Function:**
+
+```javascript
+const handleUserDetailsUpdate = (userDetails) => {
+    const chatbotIframe = document.querySelector("#teleperson-iframe");
+    if (chatbotIframe) {
+        chatbotIframe.contentWindow.postMessage(
+            {
+                type: "UPDATE_USER_DETAILS",
+            },
+            "https://teleperson.webagent.ai"
+        );
+    } else {
+        console.log("Chatbot iframe not found");
+    }
+};
+```
+
+**Usage:**
+
+```javascript
+// Call the function with updated user details
+handleUserDetailsUpdate();
+```
+
+**Note:** All these functions require the chatbot iframe to be present in the DOM with the ID `teleperson-iframe`. Make sure the iframe is properly loaded before calling these functions.

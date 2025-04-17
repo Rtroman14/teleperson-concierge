@@ -62,6 +62,21 @@ export function ChatProvider({ children, ...props }) {
         () => props.initialMessages || [getInitialMessage(props.initialSettings, telepersonUser)]
     );
 
+    // Send message to parent window on page load
+    // useEffect(() => {
+    //     // Check if we're in an iframe
+    //     if (window.self !== window.top) {
+    //         // Send message to parent window
+    //         window.parent.postMessage(
+    //             {
+    //                 type: "SET_USER_EMAIL",
+    //                 email: telepersonUser.email || "",
+    //             },
+    //             "*" // Using * for development, should be restricted to specific domains in production
+    //         );
+    //     }
+    // }, [telepersonUser.email]);
+
     const {
         messages,
         setMessages,
@@ -94,12 +109,6 @@ export function ChatProvider({ children, ...props }) {
             }
         },
     });
-
-    // useEffect(() => {
-    //     if (telepersonUser.email !== "jesse@teleperson.com") {
-    //         fetchTelepersonUserData("jesse@teleperson.com");
-    //     }
-    // }, []);
 
     // * Load teleperson user from sessionStorage on initial render
     useEffect(() => {
@@ -195,17 +204,29 @@ export function ChatProvider({ children, ...props }) {
                 return;
             }
 
-            if (event.data?.type === "SET_USER_EMAIL") {
+            if (
+                event.data?.type === "SET_USER_EMAIL" ||
+                event.data?.type === "UPDATE_USER_DETAILS"
+            ) {
                 const email = event.data.email;
 
                 // Check if we need to fetch new user data
                 if (!telepersonUser || telepersonUser.email !== email) {
+                    sessionStorage.clear();
+                    localStorage.clear();
+
                     // Fetch complete user data including vendors
+
                     await fetchTelepersonUserData(email);
                 } else {
                     // Email matches current user, no need to fetch
                     console.log("User email matches current telepersonUser");
                 }
+            }
+
+            if (event.data?.type === "USER_LOGOUT") {
+                sessionStorage.clear();
+                localStorage.clear();
             }
         };
 

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            body,
+            html {
+                height: 100%;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .centered-div {
+                text-align: center;
+            }
+            iframe {
+                width: 500px;
+                height: 800px;
+                border-radius: 14px;
+            }
+        </style>
+
+        <script type="text/javascript">
+            // const email = "jesse@teleperson.com";
+            const email = "ryan@webagent.ai";
+
+            // Load the chatbot script after 10 seconds
+            setTimeout(() => {
+                (function () {
+                    d = document;
+                    s = d.createElement("script");
+                    s.src = "http://localhost:3000/api/chatbot";
+                    s.async = 1;
+                    d.getElementsByTagName("head")[0].appendChild(s);
+                })();
+            }, 5000); // 10000 milliseconds = 10 seconds
+
+            // Function to send message to iframe
+            const sendUserEmailToChat = (email, maxRetries = 15, retryDelayMs = 1000) => {
+                let retryCount = 0;
+
+                const attemptSend = () => {
+                    const chatbotIframe = document.querySelector("#teleperson-iframe");
+
+                    if (chatbotIframe && chatbotIframe.contentWindow) {
+                        try {
+                            chatbotIframe.contentWindow.postMessage(
+                                {
+                                    type: "SET_USER_EMAIL",
+                                    email: email,
+                                },
+                                "http://localhost:3000" // target origin
+                                // "https://teleperson.webagent.ai"
+                            );
+                            console.log("Successfully sent user email to chatbot");
+                            return true; // Success
+                        } catch (err) {
+                            console.warn("Error sending message to iframe:", err);
+                        }
+                    }
+
+                    // If we reached here, the iframe wasn't ready
+                    retryCount++;
+
+                    if (retryCount < maxRetries) {
+                        console.log(
+                            `Chatbot iframe not ready, retrying in ${retryDelayMs}ms (${retryCount}/${maxRetries})`
+                        );
+                        setTimeout(attemptSend, retryDelayMs);
+                    } else {
+                        console.error(
+                            `Failed to send user email to chatbot after ${maxRetries} attempts`
+                        );
+                    }
+
+                    return false;
+                };
+
+                // Start the first attempt
+                return attemptSend();
+            };
+        </script>
+    </head>
+    <body>
+        <div class="centered-div">
+            <button
+                onclick="sendUserEmailToChat(email)"
+                style="
+                    padding: 10px 20px;
+                    margin-bottom: 20px;
+                    background-color: #4caf50;
+                    color: white;
+                    border: none;
+                    border-radius: 4px;
+                    cursor: pointer;
+                "
+            >
+                Send User ID to Chatbot
+            </button>
+        </div>
+    </body>
+</html>
