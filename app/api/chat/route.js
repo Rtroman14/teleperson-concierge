@@ -71,10 +71,10 @@ export async function POST(req) {
         //     );
         // }
 
-        // const openai = createOpenAI({
-        //     compatibility: "strict",
-        //     apiKey: process.env.OPENAI_API_KEY,
-        // });
+        const openai = createOpenAI({
+            compatibility: "strict",
+            apiKey: process.env.OPENAI_API_KEY,
+        });
 
         const google = createGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_AI_API_KEY,
@@ -97,8 +97,9 @@ export async function POST(req) {
         return createDataStreamResponse({
             execute: async (dataStream) => {
                 const result = streamText({
+                    model: openai("gpt-4.1-mini"),
                     // model: openai("gpt-4o"),
-                    model: google("gemini-2.0-flash-001"),
+                    // model: google("gemini-2.0-flash-001"),
                     system: systemMessage,
                     messages,
                     maxSteps: 5,
