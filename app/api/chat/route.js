@@ -224,6 +224,7 @@ export async function POST(req) {
                                     supabase,
                                     userQuestion,
                                     telepersonUser,
+                                    chatbotID,
                                 });
 
                                 if (savedConversation.success) {

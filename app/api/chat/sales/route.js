@@ -119,6 +119,7 @@ export async function POST(req) {
                                 const savedConversation = await saveConversationSales({
                                     supabase,
                                     userQuestion,
+                                    chatbotID,
                                 });
 
                                 if (savedConversation.success) {
