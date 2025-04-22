@@ -153,17 +153,14 @@ export function ChatProvider({ children, ...props }) {
                 name: `${userData.user.firstName} ${userData.user.lastName}`,
                 firstName: userData.user.firstName,
                 lastName: userData.user.lastName,
-                vendors: userData.vendors.map((vendor) => vendor.companyName),
+                vendors: userData.vendors.map((vendor) => vendor.companyName.trim()),
             };
 
             // Only save to sessionStorage if we have a valid ID
             if (formattedUser.id) {
                 localStorage.setItem("wa-tc-user", JSON.stringify(formattedUser));
                 setTelepersonUser(formattedUser);
-            }
 
-            // Fetch previous conversations if we have a user ID
-            if (formattedUser.id) {
                 const conversationsResponse = await fetch(
                     `/api/user/${formattedUser.id}/conversations`
                 );
@@ -455,15 +452,15 @@ export function ChatProvider({ children, ...props }) {
 
         let vendors = telepersonUser?.vendors || [];
         const testVendors = [
-            "TruStage",
-            "Teleperson",
-            "UW Credit Union",
-            "Badger Meter",
-            "Lands' End",
-            "Clarios, LLC",
-            "Generac Power Systems",
-            "Rockline Industries",
-            "Exact Sciences Coporation",
+            // "TruStage",
+            // "Teleperson",
+            // "UW Credit Union",
+            // "Badger Meter",
+            // "Lands' End",
+            // "Clarios, LLC",
+            // "Generac Power Systems",
+            // "Rockline Industries",
+            // "Exact Sciences Coporation",
         ];
         vendors = [...vendors, ...testVendors];
 

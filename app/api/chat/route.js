@@ -31,34 +31,22 @@ export async function POST(req) {
     let currentConversationID = conversationID;
 
     let vendors = telepersonUser.vendors || [];
-    const testVendors = [
-        // "TruStage",
-        // "Teleperson",
-        // "UW Credit Union",
-        // "Badger Meter",
-        // "Lands' End",
-        // "Clarios, LLC",
-        // "Generac Power Systems",
-        // "Rockline Industries",
-        // "Exact Sciences Coporation",
-    ];
-    vendors = [...vendors, ...testVendors];
 
     try {
         const supabase = await createClient();
 
         // Rate limiting check
-        const getHeaders = headers();
-        const { success: rateLimitSuccess } = await rateLimiting({
-            headers: getHeaders,
-            fallbackIdentifer: conversationID ?? telepersonUser.id,
-            maxRequests: 20,
-            window: 120,
-        });
+        // const getHeaders = headers();
+        // const { success: rateLimitSuccess } = await rateLimiting({
+        //     headers: getHeaders,
+        //     fallbackIdentifer: conversationID ?? telepersonUser.id,
+        //     maxRequests: 20,
+        //     window: 120,
+        // });
 
-        if (!rateLimitSuccess) {
-            throw new Error("Rate limit exceeded. Please try again in a few minutes.");
-        }
+        // if (!rateLimitSuccess) {
+        //     throw new Error("Rate limit exceeded. Please try again in a few minutes.");
+        // }
 
         // let { prompt: system, team_id: team } = chatbotSettings;
         // const numMessagesAllowed = team.num_messages_extra + team.prod_id.num_messages;
