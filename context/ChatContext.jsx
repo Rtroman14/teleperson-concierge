@@ -201,10 +201,7 @@ export function ChatProvider({ children, ...props }) {
                 return;
             }
 
-            if (
-                event.data?.type === "SET_USER_EMAIL" ||
-                event.data?.type === "UPDATE_USER_DETAILS"
-            ) {
+            if (event.data?.type === "SET_USER_EMAIL") {
                 const email = event.data.email;
 
                 // Check if we need to fetch new user data
@@ -218,6 +215,18 @@ export function ChatProvider({ children, ...props }) {
                 } else {
                     // Email matches current user, no need to fetch
                     console.log("User email matches current telepersonUser");
+                }
+            }
+
+            if (event.data?.type === "UPDATE_USER_DETAILS") {
+                const email = event.data.email;
+
+                // Check if we need to fetch new user data
+                if (telepersonUser.email) {
+                    sessionStorage.clear();
+                    localStorage.clear();
+
+                    await fetchTelepersonUserData(email);
                 }
             }
 
