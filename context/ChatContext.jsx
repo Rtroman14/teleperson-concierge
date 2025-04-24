@@ -146,6 +146,8 @@ export function ChatProvider({ children, ...props }) {
 
             const userData = await response.json();
 
+            console.log("Fetched user");
+
             // Format user data
             const formattedUser = {
                 id: userData.user.id || "",
@@ -218,10 +220,15 @@ export function ChatProvider({ children, ...props }) {
                 }
             }
 
+            console.log(`event.data?.type -->`, event.data?.type);
+
             if (event.data?.type === "UPDATE_USER_DETAILS") {
                 const email = event.data.email;
 
-                // Check if we need to fetch new user data
+                console.log("updating user");
+
+                console.log(`telepersonUser.email -->`, telepersonUser.email);
+
                 if (telepersonUser.email) {
                     sessionStorage.clear();
                     localStorage.clear();
