@@ -40,10 +40,10 @@ export async function POST(req) {
             throw new Error("Rate limit exceeded. Please try again in a few minutes.");
         }
 
-        // const openai = createOpenAI({
-        //     compatibility: "strict",
-        //     apiKey: process.env.OPENAI_API_KEY,
-        // });
+        const openai = createOpenAI({
+            compatibility: "strict",
+            apiKey: process.env.OPENAI_API_KEY,
+        });
 
         const google = createGoogleGenerativeAI({
             apiKey: process.env.GOOGLE_AI_API_KEY,
@@ -56,11 +56,11 @@ export async function POST(req) {
         return createDataStreamResponse({
             execute: async (dataStream) => {
                 const result = streamText({
-                    // model: openai("gpt-4o"),
-                    model: google("gemini-2.0-flash-001"),
+                    model: openai("gpt-4o"),
+                    // model: google("gemini-2.0-flash-001"),
                     system: salesSystemMessage,
                     messages,
-                    maxSteps: 2,
+                    maxSteps: 3,
                     maxTokens: 1500,
                     temperature: 0.2,
                     experimental_transform: smoothStream({
@@ -105,8 +105,17 @@ export async function POST(req) {
                                 return knowledgeBase.content;
                             },
                         }),
+                        bookCalendlyMeeting: tool({
+                            description:
+                                "Send the user a booking calendar to book a call or meeting",
+                            parameters: z.object({}),
+                            execute: async () => ({
+                                url: "https://calendly.com/teleperson/teleperson-connect",
+                            }),
+                        }),
                     },
-                    async onFinish({ text }) {
+                    async onFinish({ text, toolCalls }) {
+                        console.log(`toolCalls -->`, toolCalls);
                         // Add sources to annotations if they exist
                         if (knowledgeBase?.sources.length > 0) {
                             dataStream.writeMessageAnnotation({ sources: knowledgeBase.sources });
