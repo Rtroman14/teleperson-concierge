@@ -260,18 +260,18 @@ export function ChatProvider({ children, ...props }) {
         const firstName = telepersonUser?.firstName || "";
 
         let vendors = telepersonUser?.vendors || [];
-        const testVendors = [
-            "TruStage",
-            "Teleperson",
-            "UW Credit Union",
-            "Badger Meter",
-            "Lands' End",
-            "Clarios, LLC",
-            "Generac Power Systems",
-            "Rockline Industries",
-            "Exact Sciences Coporation",
-        ];
-        vendors = [...vendors, ...testVendors];
+        // const testVendors = [
+        //     "TruStage",
+        //     "Teleperson",
+        //     "UW Credit Union",
+        //     "Badger Meter",
+        //     "Lands' End",
+        //     "Clarios, LLC",
+        //     "Generac Power Systems",
+        //     "Rockline Industries",
+        //     "Exact Sciences Coporation",
+        // ];
+        // vendors = [...vendors, ...testVendors];
 
         // Dynamic first message based on user name
         const firstMessage = firstName

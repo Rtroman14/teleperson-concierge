@@ -9,7 +9,7 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 
 import { saveChat, saveConversationSales, findRelevantContent } from "@/lib/chat-helpers";
-import { salesSystemMessage } from "@/lib/agent-settings";
+// import { salesSystemMessage } from "@/lib/agent-settings";
 
 // Allow streaming responses up to 120 seconds
 export const maxDuration = 60;
@@ -18,11 +18,13 @@ export const dynamic = "force-dynamic";
 export async function POST(req) {
     const body = await req.json();
 
-    let { messages, conversationID } = body;
+    let { messages, conversationID, chatbotSettings } = body;
 
     const chatbotID = "e5f6ee19-c047-4391-81d0-ca3af5e9af8e";
     const userQuestion = messages[messages.length - 1].content;
     let currentConversationID = conversationID;
+
+    const systemMessage = chatbotSettings.chatbots.prompt;
 
     try {
         const supabase = await createClient();
@@ -58,7 +60,7 @@ export async function POST(req) {
                 const result = streamText({
                     model: openai("gpt-4o"),
                     // model: google("gemini-2.0-flash-001"),
-                    system: salesSystemMessage,
+                    system: systemMessage,
                     messages,
                     maxSteps: 3,
                     maxTokens: 1500,

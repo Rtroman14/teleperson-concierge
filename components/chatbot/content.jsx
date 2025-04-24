@@ -79,8 +79,6 @@ const Content = memo(function Content({
                             (tool) => tool.toolName === "bookCalendlyMeeting"
                         );
 
-                        console.log(`messages -->`, messages);
-
                         return (
                             <div key={message.id || index}>
                                 <ChatMessage

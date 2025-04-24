@@ -5,6 +5,7 @@ import Content from "./content";
 import Footer from "./footer";
 import { cn } from "@/lib/utils";
 import SalesFooter from "./footer.sales";
+import ChatBubble from "./chatbubble";
 
 export default function ChatWidget({
     title,
@@ -17,6 +18,7 @@ export default function ChatWidget({
     accentColor,
     textColor,
     handleClickChatbotBubble,
+    showPopup = false,
     darkTheme = false,
     disclaimer = { display: false, title: "", description: "" },
     messages,
@@ -26,6 +28,7 @@ export default function ChatWidget({
     input,
     conversationID,
     isPublic,
+    environment = "sandbox",
 }) {
     return (
         <>
@@ -33,7 +36,10 @@ export default function ChatWidget({
                 className={cn(
                     "chatwidget overflow-hidden shadow-xl flex h-screen flex-col overflow-y-auto",
                     open ? "" : "hidden",
-                    darkTheme ? "bg-slate-800" : "bg-white"
+                    darkTheme ? "bg-slate-800" : "bg-white",
+                    environment === "sandbox"
+                        ? "rounded-2xl sm:h-[82vh] sm:max-h-[780px]"
+                        : "flex h-screen flex-col overflow-y-auto"
                 )}
             >
                 <div className="flex h-full flex-col overflow-y-auto">
@@ -77,6 +83,20 @@ export default function ChatWidget({
                     )}
                 </div>
             </div>
+
+            {environment === "sandbox" ? (
+                <div className={cn("w-full justify-end", open ? "hidden sm:flex" : "flex")}>
+                    <ChatBubble
+                        accentColor={accentColor}
+                        iconColor={textColor}
+                        open={open}
+                        handleClickChatbotBubble={handleClickChatbotBubble}
+                        darkTheme={darkTheme}
+                        showPopup={showPopup}
+                        // welcomeMessage={welcomeMessage}
+                    />
+                </div>
+            ) : null}
         </>
     );
 }

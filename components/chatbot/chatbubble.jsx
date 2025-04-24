@@ -2,14 +2,14 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { colord } from "colord";
 import { cn } from "@/lib/utils";
 
-import Favicon from "../Favicon";
+// import Favicon from "../Favicon";
 
 export default function ChatBubble({
     accentColor,
     iconColor,
     open,
     handleClickChatbotBubble,
-    showPopup = false,
+    showPopup,
     darkTheme = false,
     welcomeMessage,
 }) {
@@ -48,7 +48,8 @@ export default function ChatBubble({
                     //         height="29"
                     //     />
                     // </div>
-                    <Favicon option={9} color={iconColor} size="29" />
+                    // <Favicon option={9} color={iconColor} size="29" />
+                    <div></div>
                 )}
             </button>
         </div>

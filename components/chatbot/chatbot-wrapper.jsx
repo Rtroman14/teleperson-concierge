@@ -61,6 +61,7 @@ function ChatbotContent({ isPublic }) {
             input={input}
             setData={setData}
             isPublic={isPublic}
+            environment="public"
         />
     );
 }
