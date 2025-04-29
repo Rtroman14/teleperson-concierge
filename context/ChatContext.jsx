@@ -223,17 +223,11 @@ export function ChatProvider({ children, ...props }) {
             console.log(`event.data?.type -->`, event.data?.type);
 
             if (event.data?.type === "UPDATE_USER_DETAILS") {
-                const email = event.data.email;
-
-                console.log("updating user");
-
-                console.log(`telepersonUser.email -->`, telepersonUser.email);
-
                 if (telepersonUser.email) {
                     sessionStorage.clear();
                     localStorage.clear();
 
-                    await fetchTelepersonUserData(email);
+                    await fetchTelepersonUserData(telepersonUser.email);
                 }
             }
 
