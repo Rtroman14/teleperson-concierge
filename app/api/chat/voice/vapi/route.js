@@ -54,16 +54,11 @@ export async function POST(req) {
     const { vendor_name, user_question } = toolCall.function.arguments;
     const toolCallId = toolCall.id;
 
-    console.log(`toolCall.function.arguments -->`, toolCall.function.arguments);
-
-    console.log(`body.message.toolCalls -->`, body.message.toolCalls);
-
     // Create conversation history from messagesOpenAIFormatted
     const conversationHistory = body.message.artifact.messagesOpenAIFormatted
         .filter((msg) => (msg.role === "user" || msg.role === "assistant") && !msg.tool_calls)
         .slice(0, -1); // Remove the last message
 
-    const chatbotID = "fb0b48ba-9449-4e83-bc51-43e2651e3e16";
     const userQuestion = user_question;
 
     let telepersonUser = {
@@ -100,7 +95,6 @@ export async function POST(req) {
         console.time("Find Relevant Content");
         const knowledgeBase = await findRelevantContent({
             question: user_question,
-            chatbotID,
             supabase,
             vendorName: vendor_name,
         });
@@ -142,8 +136,6 @@ User's question: ${user_question}
                     },
                 ],
             };
-
-            console.log(`results -->`, results);
 
             return NextResponse.json(results);
         }

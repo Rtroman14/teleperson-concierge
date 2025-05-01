@@ -220,8 +220,6 @@ export function ChatProvider({ children, ...props }) {
                 }
             }
 
-            console.log(`event.data?.type -->`, event.data?.type);
-
             if (event.data?.type === "UPDATE_USER_DETAILS") {
                 if (telepersonUser.email) {
                     sessionStorage.clear();
@@ -309,8 +307,6 @@ export function ChatProvider({ children, ...props }) {
     }, []);
 
     useEffect(() => {
-        console.log(`\n\ndata (conversationID) -->`, data);
-
         if (conversationID !== data?.conversationID && data?.conversationID) {
             setConversationID(data.conversationID);
 
@@ -461,18 +457,6 @@ export function ChatProvider({ children, ...props }) {
         const firstName = telepersonUser?.firstName || "";
 
         let vendors = telepersonUser?.vendors || [];
-        const testVendors = [
-            // "TruStage",
-            // "Teleperson",
-            // "UW Credit Union",
-            // "Badger Meter",
-            // "Lands' End",
-            // "Clarios, LLC",
-            // "Generac Power Systems",
-            // "Rockline Industries",
-            // "Exact Sciences Coporation",
-        ];
-        vendors = [...vendors, ...testVendors];
 
         // Dynamic first message based on user name
         const firstMessage = firstName
