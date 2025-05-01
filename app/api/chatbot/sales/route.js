@@ -51,8 +51,14 @@ export async function GET(request) {
         const response = new NextResponse(scriptContent, {
             headers: {
                 "Content-Type": "application/javascript; charset=utf-8",
+                "Permissions-Policy": "microphone=*",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, OPTIONS",
+                "Access-Control-Allow-Headers": "Content-Type",
             },
         });
+
+        return response;
 
         return response;
     } catch (error) {
