@@ -59,8 +59,6 @@ export async function GET(request) {
         });
 
         return response;
-
-        return response;
     } catch (error) {
         console.error(error);
         return NextResponse.json({
