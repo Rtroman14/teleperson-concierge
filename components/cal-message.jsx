@@ -30,7 +30,7 @@ export default function CalMessage({ className = "", darkMode, url }) {
             >
                 <Cal
                     namespace="30min"
-                    calLink="webagent/30min"
+                    calLink="teleperson/30min"
                     style={{ width: "100%", height: "100%", overflow: "scroll" }}
                     config={{ layout: "month_view", theme: "dark" }}
                 />
