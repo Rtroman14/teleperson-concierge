@@ -49,3 +49,5 @@ venv
 gcloud.md
 deploy.md
 deploy.txt
+
+mcp.json

@@ -9,7 +9,7 @@ import { ChatMessage } from "./chat-message";
 
 import { useAutoScroll } from "@/components/ui/use-auto-scroll";
 import { ArrowDown } from "lucide-react";
-import Calendly from "@/components/calendly-message";
+import CalMessage from "@/components/cal-message";
 
 // import { Toaster, toast } from "sonner";
 
@@ -75,8 +75,8 @@ const Content = memo(function Content({
                         const isLastMessage = messages[messages.length - 1].id === message.id;
                         const showSources = !(isLoading && isLastMessage) && !!hasSources;
 
-                        const isCalendlyMessage = message.toolInvocations?.some(
-                            (tool) => tool.toolName === "bookCalendlyMeeting"
+                        const isMeeting = message.toolInvocations?.some(
+                            (tool) => tool.toolName === "book_meeting"
                         );
 
                         return (
@@ -105,17 +105,7 @@ const Content = memo(function Content({
                                             </div>
                                         )}
 
-                                        {isCalendlyMessage && (
-                                            <Calendly
-                                                darkMode={darkTheme}
-                                                url={
-                                                    message.toolInvocations.find(
-                                                        (tool) =>
-                                                            tool.toolName === "bookCalendlyMeeting"
-                                                    )?.result?.url
-                                                }
-                                            />
-                                        )}
+                                        {isMeeting && <CalMessage darkMode={darkTheme} />}
                                     </>
                                 )}
                             </div>

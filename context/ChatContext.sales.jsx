@@ -5,6 +5,7 @@ import { useChat } from "ai/react";
 import Vapi from "@vapi-ai/web";
 import { nanoid } from "@/lib/utils";
 import { getVapiSalesAssistantConfig } from "@/lib/agent-settings";
+import { format } from "date-fns";
 
 const ChatContext = createContext({});
 
@@ -242,14 +243,54 @@ export function ChatProvider({ children, ...props }) {
     }, []); // Empty dependency array means this runs once on mount
 
     // Update the startCallInline function to create dynamic assistantOptions
-    const startCallInline = () => {
+    const startCallInline = async () => {
         setConnecting(true);
 
-        // Create dynamic assistantOptions with current telepersonUser
-        const dynamicAssistantOptions = getVapiSalesAssistantConfig();
+        try {
+            // First, fetch the user's location
+            let userTimeZone = "";
+            try {
+                const locationResponse = await fetch("/api/geo");
+                if (locationResponse.ok) {
+                    userTimeZone = await locationResponse.json();
+                }
+            } catch (locationError) {
+                console.warn("Failed to fetch user location:", locationError);
+                // Continue without location data
+            }
 
-        // Start the call with dynamic options
-        vapiRef.current.start("e2af608c-082a-4dfc-a444-535e5642a7f5", dynamicAssistantOptions);
+            console.log(`userTimeZone -->`, userTimeZone);
+
+            // Fetch the system message from Langfuse
+            const response = await fetch("/api/langfuse/prompt", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    promptName: "sales-chatbot-voice",
+                    data: {
+                        today: format(new Date(), "EEEE, MMMM do, yyyy"),
+                        timeZone: userTimeZone,
+                    },
+                }),
+            });
+            if (!response.ok) throw new Error("Failed to fetch system message");
+            const { systemMessage } = await response.json();
+
+            // Create dynamic assistantOptions with current telepersonUser and fetched system message
+            const dynamicAssistantOptions = getVapiSalesAssistantConfig(systemMessage);
+
+            // Start the call with dynamic options
+            vapiRef.current.start("e2af608c-082a-4dfc-a444-535e5642a7f5", dynamicAssistantOptions);
+        } catch (error) {
+            console.error("Error fetching system message:", error);
+            setConnecting(false);
+
+            // Fallback to default configuration if fetch fails
+            const dynamicAssistantOptions = getVapiSalesAssistantConfig();
+            vapiRef.current.start("e2af608c-082a-4dfc-a444-535e5642a7f5", dynamicAssistantOptions);
+        }
     };
 
     const endCall = () => {
