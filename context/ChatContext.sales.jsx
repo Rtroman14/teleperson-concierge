@@ -23,6 +23,22 @@ const getTimeBasedGreeting = () => {
     return "Good evening";
 };
 
+// Add this function before the ChatProvider component
+const getClientInfo = () => {
+    return {
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: navigator.language || navigator.languages[0],
+        languages: navigator.languages,
+        userAgent: navigator.userAgent,
+        platform: navigator.platform,
+        cookieEnabled: navigator.cookieEnabled,
+        onLine: navigator.onLine,
+        screenResolution: `${screen.width}x${screen.height}`,
+        colorDepth: screen.colorDepth,
+        timezoneOffset: new Date().getTimezoneOffset(),
+    };
+};
+
 const getInitialMessage = (chatbotSettings, telepersonUser) => {
     const timeGreeting = getTimeBasedGreeting();
     const userName = telepersonUser?.firstName || "";
@@ -83,6 +99,14 @@ export function ChatProvider({ children, ...props }) {
         setData(undefined);
         setConversationID(null);
     };
+
+    useEffect(() => {
+        const clientLocation = getClientInfo();
+
+        if (clientLocation?.timezone) {
+            console.log(`clientLocation.timezone -->`, clientLocation.timezone);
+        }
+    }, []);
 
     useEffect(() => {
         if (!isLoading && messages.length > props.initialMessages.length) {
@@ -247,16 +271,22 @@ export function ChatProvider({ children, ...props }) {
         setConnecting(true);
 
         try {
-            // First, fetch the user's location
-            let userTimeZone = "";
-            try {
-                const locationResponse = await fetch("/api/geo");
-                if (locationResponse.ok) {
-                    userTimeZone = await locationResponse.json();
+            const clientLocation = getClientInfo();
+
+            // First, try to get timezone from client info
+            let userTimeZone = clientLocation?.timezone || "";
+
+            // If no timezone from client info, fetch from geo API as fallback
+            if (!userTimeZone) {
+                try {
+                    const locationResponse = await fetch("/api/geo");
+                    if (locationResponse.ok) {
+                        userTimeZone = await locationResponse.json();
+                    }
+                } catch (locationError) {
+                    console.warn("Failed to fetch user location:", locationError);
+                    // Continue without location data
                 }
-            } catch (locationError) {
-                console.warn("Failed to fetch user location:", locationError);
-                // Continue without location data
             }
 
             console.log(`userTimeZone -->`, userTimeZone);

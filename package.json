@@ -43,6 +43,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "colord": "^2.9.3",
+        "countries-and-timezones": "^3.8.0",
         "date-fns": "^4.1.0",
         "date-fns-tz": "^3.2.0",
         "dotenv": "^16.4.7",

@@ -37,6 +37,6 @@ export function GET(request) {
     if (userLocation && userLocation.length) {
         return Response.json(userLocation[0].timezone);
     } else {
-        return Response.json("Timezone not found");
+        return Response.json("");
     }
 }
