@@ -303,7 +303,7 @@ export async function POST(req) {
         });
 
         const result = streamText({
-            model: google("gemini-1.5-flash-8b"),
+            model: google("gemini-2.0-flash-001"),
             prompt: `Respond to the user with "${message}"`,
             experimental_transform: smoothStream({
                 delayInMs: 20, // optional: defaults to 10ms
