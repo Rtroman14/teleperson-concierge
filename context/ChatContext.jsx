@@ -461,35 +461,33 @@ export function ChatProvider({ children, ...props }) {
             ? `${timeGreeting} ${firstName}, this is Jessica, your Teleperson Concierge. How can I help you today?`
             : "Hey, this is Jessica, your Teleperson Concierge. Who do I have the pleasure of speaking with today?";
 
-        // Prepare variables for API
-        const today = format(new Date(), "EEEE, MMMM do, yyyy");
-        const numVendors = vendors.length;
-        const vendorNames = vendors.map((vendor) => `- ${vendor}`).join("\n");
-        const guidelines = [
-            "- **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.",
-            "- **Formatting**: Use plain text formatting only. Do not include markdown syntax (such as asterisks, underscores, bullet points, code blocks, or hyperlinking); instead, organize information with simple line breaks and clear sections. ABSOLUTELY NO MARKDOWN FORMATTING!!",
-            "- **Speaking Instructions** - Provide your answer in plain, spoken language. Optimize your response for spoken communication: make it natural, conversational, and easy to understand when read aloud",
-            "- **Vendor Related** - Do not include website links while talking about vendors UNLESS the user specifically asks for it.",
-        ];
-        const pastConversations = previousConversations;
-
-        // Fetch system message from API
-        const response = await fetch("/api/system-message", {
+        // Fetch the system message from Langfuse
+        const response = await fetch("/api/langfuse/prompt", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+            },
             body: JSON.stringify({
-                firstName,
-                vendors,
-                today,
-                numVendors,
-                vendorNames,
-                guidelines,
-                pastConversations,
+                promptName: "vendor-chatbot-voice",
+                data: {
+                    firstName,
+                    today: format(new Date(), "EEEE, MMMM do, yyyy"),
+                    numVendors: vendors.length,
+                    vendorNames: vendors.map((vendor) => `- ${vendor}`).join("\n"),
+                    pastConversations: previousConversations,
+                },
             }),
         });
-        const { systemMessage } = await response.json();
+        if (!response.ok) throw new Error("Failed to fetch system message");
+        const promptResult = await response.json();
 
-        console.log(systemMessage);
+        let systemMessage = "";
+
+        if (!promptResult.success) {
+            // TODO: handle this
+        }
+
+        systemMessage = promptResult.data.systemMessage;
 
         return getVapiAssistantConfig({
             vendors,

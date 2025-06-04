@@ -12,27 +12,37 @@ export async function POST(req) {
         const { promptName, data = {} } = await req.json();
 
         if (!promptName) {
-            return Response.json({ error: "Prompt name is required" }, { status: 400 });
+            return Response.json(
+                { success: false, error: "Prompt name is required" },
+                { status: 400 }
+            );
         }
 
         // Get the prompt from Langfuse
         const prompt = await langfuse.getPrompt(promptName);
 
         if (!prompt) {
-            return Response.json({ error: `Prompt '${promptName}' not found` }, { status: 404 });
+            return Response.json(
+                { success: false, error: `Prompt '${promptName}' not found` },
+                { status: 404 }
+            );
         }
 
         // Compile the prompt with current date and additional data
         const systemMessage = prompt.compile(data);
 
         return Response.json({
-            systemMessage,
-            promptName,
-            compiledAt: new Date().toISOString(),
+            success: true,
+            data: {
+                systemMessage,
+            },
         });
     } catch (error) {
         console.error("Error fetching Langfuse prompt:", error);
 
-        return Response.json({ error: "Failed to fetch prompt from Langfuse" }, { status: 500 });
+        return Response.json(
+            { success: false, error: "Failed to fetch prompt from Langfuse" },
+            { status: 500 }
+        );
     }
 }

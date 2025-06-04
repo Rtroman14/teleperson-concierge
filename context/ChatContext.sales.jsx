@@ -306,7 +306,15 @@ export function ChatProvider({ children, ...props }) {
                 }),
             });
             if (!response.ok) throw new Error("Failed to fetch system message");
-            const { systemMessage } = await response.json();
+            const promptResult = await response.json();
+
+            let systemMessage = "";
+
+            if (!promptResult.success) {
+                // TODO: handle this
+            }
+
+            systemMessage = promptResult.data.systemMessage;
 
             // Create dynamic assistantOptions with current telepersonUser and fetched system message
             const dynamicAssistantOptions = getVapiSalesAssistantConfig(systemMessage);

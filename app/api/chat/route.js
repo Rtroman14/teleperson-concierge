@@ -79,26 +79,14 @@ export async function POST(req) {
         let knowledgeBase = { content: "", sources: [], messageSources: [] };
         let rephrasedInquiry = userQuestion;
 
-        // Prepare variables for the Langfuse prompt
-        const today = format(new Date(), "EEEE, MMMM do, yyyy");
-        const numVendors = vendors.length;
-        const vendorNames = vendors.map((vendor) => `- ${vendor}`).join("\n");
-        const guidelines = [
-            "- **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.",
-            "- **Formatting**: Use markdown formatting, lists, and clear sections to organize your response.",
-        ];
-        const pastConversations = previousConversations;
-        const firstName = telepersonUser.firstName;
-
         // Load and compile the Langfuse prompt
         const prompt = await langfuse.getPrompt("vendor-chatbot-text");
         const systemMessage = prompt.compile({
-            firstName,
-            today,
-            numVendors,
-            vendorNames,
-            guidelines,
-            pastConversations,
+            firstName: telepersonUser.firstName,
+            today: format(new Date(), "EEEE, MMMM do, yyyy"),
+            numVendors: vendors.length,
+            vendorNames: vendors.map((vendor) => `- ${vendor}`).join("\n"),
+            pastConversations: previousConversations,
         });
 
         // Return data stream response with annotations and status updates
