@@ -7,6 +7,8 @@ import slackNotification from "@/lib/slackNotification";
 import _ from "@/lib/Helpers";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
+import { Langfuse } from "langfuse";
+import { format } from "date-fns";
 
 import {
     saveChat,
@@ -14,12 +16,18 @@ import {
     findRelevantContent,
     incrementMessagesSent,
 } from "@/lib/chat-helpers";
-import { getSystemMessage } from "@/lib/agent-settings";
 import TelepersonAPIs from "@/lib/teleperson-apis";
 
 // Allow streaming responses up to 120 seconds
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
+
+// Initialize Langfuse client
+const langfuse = new Langfuse({
+    publicKey: process.env.LANGFUSE_PUBLIC_KEY,
+    secretKey: process.env.LANGFUSE_SECRET_KEY,
+    baseUrl: process.env.LANGFUSE_BASEURL,
+});
 
 export async function POST(req) {
     const body = await req.json();
@@ -71,14 +79,26 @@ export async function POST(req) {
         let knowledgeBase = { content: "", sources: [], messageSources: [] };
         let rephrasedInquiry = userQuestion;
 
-        const systemMessage = getSystemMessage({
-            firstName: telepersonUser.firstName,
-            vendors,
-            previousConversations,
-            guidelines: [
-                "- **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.",
-                "- **Formatting**: Use markdown formatting, lists, and clear sections to organize your response.",
-            ],
+        // Prepare variables for the Langfuse prompt
+        const today = format(new Date(), "EEEE, MMMM do, yyyy");
+        const numVendors = vendors.length;
+        const vendorNames = vendors.map((vendor) => `- ${vendor}`).join("\n");
+        const guidelines = [
+            "- **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.",
+            "- **Formatting**: Use markdown formatting, lists, and clear sections to organize your response.",
+        ];
+        const pastConversations = previousConversations;
+        const firstName = telepersonUser.firstName;
+
+        // Load and compile the Langfuse prompt
+        const prompt = await langfuse.getPrompt("vendor-chatbot-text");
+        const systemMessage = prompt.compile({
+            firstName,
+            today,
+            numVendors,
+            vendorNames,
+            guidelines,
+            pastConversations,
         });
 
         // Return data stream response with annotations and status updates

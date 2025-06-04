@@ -5,6 +5,7 @@ import { useChat } from "ai/react";
 import Vapi from "@vapi-ai/web";
 import { nanoid } from "@/lib/utils";
 import { getVapiAssistantConfig } from "@/lib/agent-settings";
+import { format } from "date-fns";
 
 const ChatContext = createContext({});
 
@@ -450,12 +451,9 @@ export function ChatProvider({ children, ...props }) {
         };
     }, []); // Empty dependency array means this runs once on mount
 
-    // Move assistantOptions to be created dynamically when needed
-    // https://docs.vapi.ai/api-reference/assistants/create
-    const createAssistantOptions = (telepersonUser) => {
+    const createAssistantOptions = async (telepersonUser) => {
         const timeGreeting = getTimeBasedGreeting();
         const firstName = telepersonUser?.firstName || "";
-
         let vendors = telepersonUser?.vendors || [];
 
         // Dynamic first message based on user name
@@ -463,21 +461,50 @@ export function ChatProvider({ children, ...props }) {
             ? `${timeGreeting} ${firstName}, this is Jessica, your Teleperson Concierge. How can I help you today?`
             : "Hey, this is Jessica, your Teleperson Concierge. Who do I have the pleasure of speaking with today?";
 
+        // Prepare variables for API
+        const today = format(new Date(), "EEEE, MMMM do, yyyy");
+        const numVendors = vendors.length;
+        const vendorNames = vendors.map((vendor) => `- ${vendor}`).join("\n");
+        const guidelines = [
+            "- **Brevity**: Limit responses to 1-4 sentences, focusing on the most pertinent information.",
+            "- **Formatting**: Use plain text formatting only. Do not include markdown syntax (such as asterisks, underscores, bullet points, code blocks, or hyperlinking); instead, organize information with simple line breaks and clear sections. ABSOLUTELY NO MARKDOWN FORMATTING!!",
+            "- **Speaking Instructions** - Provide your answer in plain, spoken language. Optimize your response for spoken communication: make it natural, conversational, and easy to understand when read aloud",
+            "- **Vendor Related** - Do not include website links while talking about vendors UNLESS the user specifically asks for it.",
+        ];
+        const pastConversations = previousConversations;
+
+        // Fetch system message from API
+        const response = await fetch("/api/system-message", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                firstName,
+                vendors,
+                today,
+                numVendors,
+                vendorNames,
+                guidelines,
+                pastConversations,
+            }),
+        });
+        const { systemMessage } = await response.json();
+
+        console.log(systemMessage);
+
         return getVapiAssistantConfig({
-            firstName,
             vendors,
             firstMessage,
             telepersonUserId: telepersonUser.id,
-            previousConversations,
+            systemMessage,
         });
     };
 
     // Update the startCallInline function to create dynamic assistantOptions
-    const startCallInline = () => {
+    const startCallInline = async () => {
         setConnecting(true);
 
         // Create dynamic assistantOptions with current telepersonUser
-        const dynamicAssistantOptions = createAssistantOptions(telepersonUser);
+        const dynamicAssistantOptions = await createAssistantOptions(telepersonUser);
 
         // Start the call with dynamic options
         vapiRef.current.start("e2af608c-082a-4dfc-a444-535e5642a7f5", dynamicAssistantOptions);
