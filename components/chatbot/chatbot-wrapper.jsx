@@ -9,8 +9,29 @@ import {
     useChatContext as useSalesChatContext,
 } from "@/context/ChatContext.sales";
 
-export default function TelepersonChatbot({ environment, settings, initialMessages }) {
-    const Provider = environment === "public" ? SalesChatbotProvider : ChatProvider;
+import {
+    ChatProvider as DemoChatbotProvider,
+    useChatContext as useDemoChatContext,
+} from "@/context/ChatContext.demo";
+
+export default function TelepersonChatbot({
+    environment,
+    settings,
+    initialMessages,
+    industry = null,
+}) {
+    // Determine which provider to use based on environment
+    let Provider;
+    if (environment === "public") {
+        Provider = SalesChatbotProvider;
+    } else if (environment === "authenticated") {
+        Provider = ChatProvider;
+    } else if (environment === "demo") {
+        Provider = DemoChatbotProvider;
+    } else {
+        // Default to authenticated environment
+        Provider = SalesChatbotProvider;
+    }
 
     return (
         <Provider
@@ -18,14 +39,27 @@ export default function TelepersonChatbot({ environment, settings, initialMessag
             widgetType="ChatWidget"
             initialSettings={settings}
             initialMessages={initialMessages}
+            industry={industry}
         >
-            <ChatbotContent isPublic={environment === "public"} />
+            <ChatbotContent environment={environment} />
         </Provider>
     );
 }
 
-function ChatbotContent({ isPublic }) {
-    const context = isPublic ? useSalesChatContext() : useChatContext();
+function ChatbotContent({ environment }) {
+    // Determine which context hook to use based on environment
+    let context;
+    if (environment === "public") {
+        context = useSalesChatContext();
+    } else if (environment === "authenticated") {
+        context = useChatContext();
+    } else if (environment === "demo") {
+        context = useDemoChatContext();
+    } else {
+        // Default to authenticated environment
+        context = useChatContext();
+    }
+
     const {
         chatbotSettings,
         messages,
@@ -60,8 +94,8 @@ function ChatbotContent({ isPublic }) {
             handleSubmit={handleSubmit}
             input={input}
             setData={setData}
-            isPublic={isPublic}
-            environment="public"
+            isPublic={environment === "public"}
+            environment={environment}
         />
     );
 }
