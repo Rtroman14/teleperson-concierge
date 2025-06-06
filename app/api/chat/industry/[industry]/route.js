@@ -11,7 +11,6 @@ import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/admin";
 import { rateLimiting } from "@/lib/rateLimit";
 import slackNotification from "@/lib/slackNotification";
-import _ from "@/lib/Helpers";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
 import { saveChat, saveConversationSales, findRelevantContent } from "@/lib/chat-helpers";
@@ -46,8 +45,6 @@ export async function POST(req, { params }) {
     const userQuestion = messages[messages.length - 1].content;
     let currentConversationID = conversationID;
 
-    const industryPrompt = _.getPromptName(industry);
-
     try {
         const supabase = await createClient();
 
@@ -55,7 +52,7 @@ export async function POST(req, { params }) {
 
         // TODO: dynamically load langfuse prompt by industry name
 
-        const prompt = await langfuse.getPrompt(industryPrompt.textPrompt);
+        const prompt = await langfuse.getPrompt(`${industry}-chatbot-text`);
         const systemMessage = prompt.compile({
             today,
         });
@@ -122,7 +119,7 @@ export async function POST(req, { params }) {
                     tools: allTools,
                     experimental_telemetry: {
                         isEnabled: true,
-                        functionId: industryPrompt.telemetryId,
+                        functionId: `${industry}-chatbot`,
                         metadata: {},
                     },
                     async onFinish({ text, toolCalls }) {

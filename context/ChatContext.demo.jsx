@@ -5,7 +5,6 @@ import { useChat } from "ai/react";
 import Vapi from "@vapi-ai/web";
 import { nanoid } from "@/lib/utils";
 import { getVapiSalesAssistantConfig } from "@/lib/agent-settings";
-import _ from "@/lib/Helpers";
 import { format } from "date-fns";
 
 const ChatContext = createContext({});
@@ -37,8 +36,6 @@ export function ChatProvider({ children, ...props }) {
     const [conversationID, setConversationID] = useState(null);
 
     const STORAGE_KEY = `demo-${props.industry}`;
-
-    const prompt = _.getPromptName(props.industry);
 
     const {
         messages,
@@ -278,7 +275,7 @@ export function ChatProvider({ children, ...props }) {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    promptName: prompt.voicePrompt,
+                    promptName: `${props.industry}-chatbot-voice`,
                     data: {
                         today: format(new Date(), "EEEE, MMMM do, yyyy"),
                         timeZone: userTimeZone,
