@@ -60,6 +60,8 @@ function ChatbotContent({ environment }) {
         context = useChatContext();
     }
 
+    const suggestedQuestion = environment === "demo" ? [] : chatbotSettings.suggested_questions;
+
     const {
         chatbotSettings,
         messages,
@@ -81,7 +83,7 @@ function ChatbotContent({ environment }) {
             subheading={chatbotSettings.subheading}
             logoUrl={chatbotSettings.logo_url}
             reset={handleRefresh}
-            suggestedQuestions={chatbotSettings.suggested_questions}
+            suggestedQuestions={suggestedQuestion}
             inputPlaceholder={chatbotSettings.input_placeholder}
             accentColor={chatbotSettings.accent_color}
             textColor={chatbotSettings.text_color}
