@@ -1,4 +1,7 @@
 module.exports = ({ industry }) => {
+    const iframeSrc = `https://teleperson.webagent.ai/industry/${industry}`;
+    // const iframeSrc = `http://localhost:3000/industry/${industry}`;
+
     // Only generate the iframe and inject it into #chatbot-container
     return `
         (function() {
@@ -6,8 +9,7 @@ module.exports = ({ industry }) => {
             if (!container) return;
 
             const iframe = document.createElement('iframe');
-            // iframe.src = "http://localhost:3000/industry/\`${industry}\`";
-            iframe.src = "https://teleperson.webagent.ai/industry/\`${industry}\`";
+            iframe.src = \`${iframeSrc}\`;
 
             iframe.id = 'teleperson-iframe';
             iframe.title = 'Teleperson Concierge';

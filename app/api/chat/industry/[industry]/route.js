@@ -50,8 +50,6 @@ export async function POST(req, { params }) {
 
         const today = format(new Date(), "EEEE, MMMM do, yyyy");
 
-        // TODO: dynamically load langfuse prompt by industry name
-
         const prompt = await langfuse.getPrompt(`${industry}-chatbot-text`);
         const systemMessage = prompt.compile({
             today,
