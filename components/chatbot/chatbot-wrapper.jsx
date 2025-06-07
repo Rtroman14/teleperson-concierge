@@ -96,7 +96,7 @@ function ChatbotContent({ environment }) {
             handleSubmit={handleSubmit}
             input={input}
             setData={setData}
-            isPublic={environment === "public"}
+            isPublic={environment === "public" || environment === "demo"}
             environment={environment}
         />
     );

@@ -70,6 +70,7 @@ export default function ChatWidget({
                             handleInputChange={handleInputChange}
                             handleSubmit={handleSubmit}
                             input={input}
+                            environment={environment}
                         />
                     ) : (
                         <Footer

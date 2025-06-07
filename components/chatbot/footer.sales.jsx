@@ -7,7 +7,8 @@ import ReactSiriwave from "react-siriwave";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useChatContext } from "@/context/ChatContext.sales";
+import { useChatContext as useSalesChatbotContext } from "@/context/ChatContext.sales";
+import { useChatContext as useDemoChatbotContext } from "@/context/ChatContext.demo";
 
 export default function SalesFooter({
     inputPlaceholder,
@@ -17,9 +18,14 @@ export default function SalesFooter({
     handleSubmit,
     isLoading,
     input,
+    environment,
 }) {
+    // Call both hooks to satisfy React rules of hooks
+    const salesContext = useSalesChatbotContext();
+    const demoContext = useDemoChatbotContext();
+    // Select the correct context based on environment
     const { handleCall, endCall, isCallActive, connecting, connected, volumeLevel } =
-        useChatContext();
+        environment === "public" ? salesContext : demoContext;
 
     const hasSuggestedQuestions = suggestedQuestions.length && suggestedQuestions[0] !== "";
 
