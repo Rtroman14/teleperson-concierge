@@ -60,8 +60,6 @@ function ChatbotContent({ environment }) {
         context = useChatContext();
     }
 
-    const suggestedQuestion = environment === "demo" ? [] : chatbotSettings.suggested_questions;
-
     const {
         chatbotSettings,
         messages,
@@ -73,6 +71,8 @@ function ChatbotContent({ environment }) {
         setData,
         conversationID,
     } = context;
+
+    const suggestedQuestion = environment === "demo" ? [] : chatbotSettings.suggested_questions;
 
     return (
         <ChatWidget
