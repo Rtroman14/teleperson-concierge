@@ -29,6 +29,8 @@ export default function ChatWidget({
     conversationID,
     isPublic,
     environment = "sandbox",
+    endCall,
+    isCallActive,
 }) {
     return (
         <>
@@ -51,6 +53,8 @@ export default function ChatWidget({
                         subheading={subheading}
                         reset={reset}
                         handleClose={handleClickChatbotBubble}
+                        endCall={endCall}
+                        isCallActive={isCallActive}
                     />
 
                     <Content

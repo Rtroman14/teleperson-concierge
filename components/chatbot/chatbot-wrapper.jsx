@@ -70,6 +70,8 @@ function ChatbotContent({ environment }) {
         handleRefresh,
         setData,
         conversationID,
+        endCall,
+        isCallActive,
     } = context;
 
     const suggestedQuestion = environment === "demo" ? [] : chatbotSettings.suggested_questions;
@@ -79,6 +81,8 @@ function ChatbotContent({ environment }) {
             id={chatbotSettings.id}
             conversationID={conversationID}
             open={true}
+            endCall={endCall}
+            isCallActive={isCallActive}
             title={chatbotSettings.title}
             subheading={chatbotSettings.subheading}
             logoUrl={chatbotSettings.logo_url}

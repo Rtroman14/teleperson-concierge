@@ -15,6 +15,8 @@ export default function Header({
     accentColor,
     textColor,
     handleClose = () => {},
+    isCallActive,
+    endCall,
 }) {
     const hslColor = colord(accentColor).toHsl();
 
@@ -77,7 +79,10 @@ export default function Header({
             </div>
             <Button
                 aria-label="Refresh Chat"
-                onClick={reset}
+                onClick={() => {
+                    reset();
+                    if (isCallActive) endCall();
+                }}
                 size="sm"
                 className="bg-slate-900/30 text-white duration-100 hover:bg-slate-900/40"
             >
