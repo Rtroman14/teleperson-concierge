@@ -1,8 +1,9 @@
 ---
-description: 
-globs: 
+description: Best practices for prompt engineering large language models
+globs:
 alwaysApply: false
 ---
+
 # Prompt Engineering Cheatsheet
 
 For writing **system** and **prompt** strings for `generateText()` or `generateObject()`.
@@ -10,42 +11,48 @@ For writing **system** and **prompt** strings for `generateText()` or `generateO
 ---
 
 ## Big Picture
-- **System message**: Sets AI role, rules, and output format.
-- **Prompt**: Defines task with goal, data, and deliverable.
-- System message overrides prompt if conflicts arise.
+
+-   **System message**: Sets AI role, rules, and output format.
+-   **Prompt**: Defines task with goal, data, and deliverable.
+-   System message overrides prompt if conflicts arise.
 
 ---
 
 ## Structure
+
 ### System Message
-- **Identity**: Role and objective.
-- **Instructions**: Rules, output format, restrictions.
-- **Tools** (optional): Available tools and usage.
-- **Examples** (optional): Add if zero-shot fails.
-- **Context**: Task-specific info.
+
+-   **Identity**: Role and objective.
+-   **Instructions**: Rules, output format, restrictions.
+-   **Tools** (optional): Available tools and usage.
+-   **Examples** (optional): Add if zero-shot fails.
+-   **Context**: Task-specific info.
 
 ### Prompt
-- **Task**: Goal of the task.
-- **Data**: Relevant data/context.
-- **Recap**: Expected deliverable.
+
+-   **Task**: Goal of the task.
+-   **Data**: Relevant data/context.
+-   **Recap**: Expected deliverable.
 
 Use **Markdown headings** for sections and **XML tags** for data blocks.
 
 ---
 
 ## Best Practices
-- Keep system and prompt concise.
-- Use delimiters (e.g., `##`, `<data>`) to isolate content.
-- Start with zero-shot; add examples if needed.
-- Specify output: format, length, constraints.
-- Don’t request step-by-step reasoning.
-- Align prompt with system message.
-- Test and refine prompts.
-- Guide tool calls. Describe the tool to the model and explain *when* to call i.
+
+-   Keep system and prompt concise.
+-   Use delimiters (e.g., `##`, `<data>`) to isolate content.
+-   Start with zero-shot; add examples if needed.
+-   Specify output: format, length, constraints.
+-   Don’t request step-by-step reasoning.
+-   Align prompt with system message.
+-   Test and refine prompts.
+-   Guide tool calls. Describe the tool to the model and explain _when_ to call i.
 
 ---
 
 ## Example
+
 ```js
 const system = `
 ## Identity
@@ -64,7 +71,7 @@ You are an expert SQL engineer.
 <data>
 Refer to /docs/sql_style.md for naming conventions.
 </data>
-`
+`;
 
 const prompt = `
 ## Task
@@ -76,7 +83,7 @@ ETL jobs run daily; script must be idempotent.
 </data>
 
 Generate a single SQL script.
-`
+`;
 
 const { text } = await generateText({ model, system, prompt });
 ```
@@ -84,14 +91,16 @@ const { text } = await generateText({ model, system, prompt });
 ---
 
 ## Checklist
-- [ ] System: Identity, Instructions, (Tools), (Examples), Context
-- [ ] Prompt: Task, Data, Recap
-- [ ] Markdown and XML for structure
-- [ ] No reasoning requests
-- [ ] Output format clear
-- [ ] Prompt matches system message
+
+-   [ ] System: Identity, Instructions, (Tools), (Examples), Context
+-   [ ] Prompt: Task, Data, Recap
+-   [ ] Markdown and XML for structure
+-   [ ] No reasoning requests
+-   [ ] Output format clear
+-   [ ] Prompt matches system message
 
 ---
 
 ## Summary
+
 Clear system message + structured prompt + proper formatting = effective AI output.
