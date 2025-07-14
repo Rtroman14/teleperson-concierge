@@ -223,6 +223,11 @@ export async function POST(req) {
                         //     },
                         // }),
                     },
+                    experimental_telemetry: {
+                        isEnabled: true,
+                        functionId: "vendor-chatbot",
+                        metadata: {},
+                    },
                     async onFinish({ text }) {
                         // Add sources to annotations if they exist
                         if (knowledgeBase?.sources.length > 0) {

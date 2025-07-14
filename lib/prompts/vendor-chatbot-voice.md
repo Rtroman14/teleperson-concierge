@@ -100,7 +100,7 @@ Stripe Integration Requirements:
 
 ## Available Tools:
 
-### get_more_information
+### get_vendor_information
 
 -   **Description**: Retrieves detailed information from your knowledge base for vendor-specific queries.
 -   **When to Use**: Invoke this tool when the user's question involves specific details about a vendor (for example, features, policies, or leadership information).
