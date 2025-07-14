@@ -1,5 +1,12 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, createDataStreamResponse, smoothStream, tool, generateText } from "ai";
+import {
+    streamText,
+    createDataStreamResponse,
+    smoothStream,
+    tool,
+    generateText,
+    experimental_createMCPClient,
+} from "ai";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/admin";
 import { rateLimiting } from "@/lib/rateLimit";
@@ -16,7 +23,6 @@ import {
     findRelevantContent,
     incrementMessagesSent,
 } from "@/lib/chat-helpers";
-import TelepersonAPIs from "@/lib/teleperson-apis";
 
 // Allow streaming responses up to 120 seconds
 export const maxDuration = 60;
@@ -83,11 +89,21 @@ export async function POST(req) {
         const prompt = await langfuse.getPrompt("vendor-chatbot-text");
         const systemMessage = prompt.compile({
             firstName: telepersonUser.firstName,
+            email: telepersonUser.email,
             today: format(new Date(), "EEEE, MMMM do, yyyy"),
             numVendors: vendors.length,
             vendorNames: vendors.map((vendor) => `- ${vendor}`).join("\n"),
             pastConversations: previousConversations,
         });
+
+        const mcpClientVendor = await experimental_createMCPClient({
+            transport: {
+                type: "sse",
+                url: `${process.env.MCP_SERVER_DOMAIN}/vendor/sse`,
+            },
+        });
+
+        const mcpVendorTools = await mcpClientVendor.tools();
 
         // Return data stream response with annotations and status updates
         return createDataStreamResponse({
@@ -146,65 +162,66 @@ export async function POST(req) {
                                 return knowledgeBase.content;
                             },
                         }),
-                        getUsersVendors: tool({
-                            description:
-                                "Get a list of vendors and their descriptions from the user's vendor hub.",
-                            parameters: z.object({}),
-                            execute: async () => {
-                                console.log("getUsersVendors");
-                                if (!telepersonUser || !telepersonUser.id) {
-                                    return "No user information available.";
-                                }
-                                const vendorsResult = await TelepersonAPIs.fetchVendorsByUserId(
-                                    telepersonUser.id
-                                );
+                        ...mcpVendorTools,
+                        // getUsersVendors: tool({
+                        //     description:
+                        //         "Get a list of vendors and their descriptions from the user's vendor hub.",
+                        //     parameters: z.object({}),
+                        //     execute: async () => {
+                        //         console.log("getUsersVendors");
+                        //         if (!telepersonUser || !telepersonUser.id) {
+                        //             return "No user information available.";
+                        //         }
+                        //         const vendorsResult = await TelepersonAPIs.fetchVendorsByUserId(
+                        //             telepersonUser.id
+                        //         );
 
-                                if (!vendorsResult.success) {
-                                    return "Unable to retrieve vendor information at this time.";
-                                }
-                                if (vendorsResult.data.length === 0) {
-                                    return "The user doesn't have any vendors in their hub.";
-                                }
+                        //         if (!vendorsResult.success) {
+                        //             return "Unable to retrieve vendor information at this time.";
+                        //         }
+                        //         if (vendorsResult.data.length === 0) {
+                        //             return "The user doesn't have any vendors in their hub.";
+                        //         }
 
-                                const vendorHub = vendorsResult.data.map(({ id, ...rest }) => rest);
+                        //         const vendorHub = vendorsResult.data.map(({ id, ...rest }) => rest);
 
-                                // let vendorHub = [...vendorNames, ...testVendors];
+                        //         // let vendorHub = [...vendorNames, ...testVendors];
 
-                                return `
-                                The user has the following vendors (${
-                                    vendorHub.length
-                                }) in their hub:
-                                """
-                                ${JSON.stringify(vendorHub, null, 4)}
-                                """`;
-                            },
-                        }),
-                        getUserTransactions: tool({
-                            description: "Get a list of the user's recent transactions.",
-                            parameters: z.object({}),
-                            execute: async () => {
-                                if (!telepersonUser || !telepersonUser.id) {
-                                    return "No user information available.";
-                                }
-                                const transactions = await TelepersonAPIs.fetchTransactions(
-                                    telepersonUser.id
-                                );
-                                if (!transactions.success) {
-                                    return "Unable to retrieve transaction information at this time.";
-                                }
-                                if (!transactions.data || transactions.data.length === 0) {
-                                    return "No transactions found for this user.";
-                                }
-                                const formattedTransactions = transactions.data
-                                    .map((tx) => {
-                                        const date = new Date(tx.transactedAt).toLocaleDateString();
-                                        return `- ${date}: ${tx.description} - $${tx.amount} (${tx.type}) [${tx.category}]`;
-                                    })
-                                    .join("\n");
+                        //         return `
+                        //         The user has the following vendors (${
+                        //             vendorHub.length
+                        //         }) in their hub:
+                        //         """
+                        //         ${JSON.stringify(vendorHub, null, 4)}
+                        //         """`;
+                        //     },
+                        // }),
+                        // getUserTransactions: tool({
+                        //     description: "Get a list of the user's recent transactions.",
+                        //     parameters: z.object({}),
+                        //     execute: async () => {
+                        //         if (!telepersonUser || !telepersonUser.id) {
+                        //             return "No user information available.";
+                        //         }
+                        //         const transactions = await TelepersonAPIs.fetchTransactions(
+                        //             telepersonUser.id
+                        //         );
+                        //         if (!transactions.success) {
+                        //             return "Unable to retrieve transaction information at this time.";
+                        //         }
+                        //         if (!transactions.data || transactions.data.length === 0) {
+                        //             return "No transactions found for this user.";
+                        //         }
+                        //         const formattedTransactions = transactions.data
+                        //             .map((tx) => {
+                        //                 const date = new Date(tx.transactedAt).toLocaleDateString();
+                        //                 return `- ${date}: ${tx.description} - $${tx.amount} (${tx.type}) [${tx.category}]`;
+                        //             })
+                        //             .join("\n");
 
-                                return `Here are your recent transactions:\n${formattedTransactions}`;
-                            },
-                        }),
+                        //         return `Here are your recent transactions:\n${formattedTransactions}`;
+                        //     },
+                        // }),
                     },
                     async onFinish({ text }) {
                         // Add sources to annotations if they exist

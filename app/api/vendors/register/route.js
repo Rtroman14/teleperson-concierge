@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import slackNotification from "@/lib/slackNotification";
 import _ from "@/lib/Helpers";
 import axios from "axios";
-import TelepersonAPIs from "@/lib/teleperson-apis";
+import TelepersonAPIs from "@/lib/teleperson-apis.new";
 
 // Add auth middleware
 const authenticateRequest = (request) => {
@@ -39,7 +39,10 @@ export async function POST(request) {
         });
 
         // Fetch vendor from Teleperson API
-        const vendorResponse = await TelepersonAPIs.fetchVendorById(body.id);
+        const vendorResponse = await TelepersonAPIs.fetchVendor({
+            email: "jesse@teleperson.com",
+            id: body.id,
+        });
 
         if (!vendorResponse.success) {
             throw new Error(`Failed to fetch vendor from Teleperson: ${vendorResponse.message}`);

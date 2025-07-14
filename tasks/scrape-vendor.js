@@ -2,7 +2,6 @@ import dotenv from "dotenv";
 import _ from "../lib/Helpers.js";
 import { createClient } from "@supabase/supabase-js";
 import axios from "axios";
-// import TelepersonAPIs from "../lib/teleperson-apis.js";
 
 dotenv.config({ path: ".env.local" });
 

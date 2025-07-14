@@ -14,9 +14,9 @@ import slackNotification from "@/lib/slackNotification";
 import _ from "@/lib/Helpers";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-import { saveChat, saveConversationSales, findRelevantContent } from "@/lib/chat-helpers";
-import { chatTools } from "@/lib/chat-tools";
+import { saveChat, saveConversationSales } from "@/lib/chat-helpers";
 import { geolocation } from "@vercel/functions";
+// import { chatTools } from "@/lib/chat-tools";
 
 import { Langfuse } from "langfuse";
 
@@ -78,29 +78,18 @@ export async function POST(req) {
         let knowledgeBase = { content: "", sources: [], messageSources: [] };
         let rephrasedInquiry = userQuestion;
 
-        // const mcpServerUrl = "https://aa2e-2601-280-5c00-7d80-5cf3-b53f-66df-8edc.ngrok-free.app";
-        const mcpServerUrl = process.env.MCP_SERVER_DOMAIN;
-
-        const mcpClientBooking = await experimental_createMCPClient({
+        const mcpClientSales = await experimental_createMCPClient({
             transport: {
                 type: "sse",
-                url: `${mcpServerUrl}/booking/sse`,
-            },
-        });
-        const mcpClientWebsite = await experimental_createMCPClient({
-            transport: {
-                type: "sse",
-                url: `${mcpServerUrl}/website/sse`,
+                url: `${process.env.MCP_SERVER_DOMAIN}/sales/text/sse`,
             },
         });
 
-        const mcpBookingTools = await mcpClientBooking.tools();
-        const mcpWebsiteTools = await mcpClientWebsite.tools();
+        const mcpSalesTools = await mcpClientSales.tools();
 
         const allTools = {
-            ...mcpBookingTools,
-            ...mcpWebsiteTools,
-            ...chatTools,
+            ...mcpSalesTools,
+            // ...chatTools,
         };
 
         // Return data stream response with annotations and status updates
@@ -122,13 +111,8 @@ export async function POST(req) {
                         functionId: "sales-chatbot",
                         metadata: {},
                     },
-                    onStepFinish: async ({ toolCalls, toolResults }) => {
-                        // console.log(`toolCalls -->`, toolCalls);
-                        // console.log(`toolResults -->`, toolResults);
-                    },
                     async onFinish({ text, toolCalls }) {
-                        await mcpClientBooking.close();
-                        await mcpClientWebsite.close();
+                        await mcpClientSales.close();
 
                         console.log(`toolCalls -->`, toolCalls);
                         // Add sources to annotations if they exist
@@ -194,9 +178,7 @@ export async function POST(req) {
                     },
                     onError: async ({ error }) => {
                         console.log(`error -->`, error);
-
-                        await mcpClientBooking.close();
-                        await mcpClientWebsite.close();
+                        await mcpClientSales.close();
                     },
                 });
 
@@ -205,8 +187,8 @@ export async function POST(req) {
             },
             onError: async (error) => {
                 console.log(`error -->`, error);
-                await mcpClientBooking.close();
-                await mcpClientWebsite.close();
+                await mcpClientSales.close();
+
                 // Return user-friendly error message
                 if (error == null) return "Unknown error";
                 if (typeof error === "string") return error;

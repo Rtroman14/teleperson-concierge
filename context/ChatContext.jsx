@@ -147,8 +147,6 @@ export function ChatProvider({ children, ...props }) {
 
             const userData = await response.json();
 
-            console.log("Fetched user");
-
             // Format user data
             const formattedUser = {
                 id: userData.user.id || "",
@@ -156,7 +154,7 @@ export function ChatProvider({ children, ...props }) {
                 name: `${userData.user.firstName} ${userData.user.lastName}`,
                 firstName: userData.user.firstName,
                 lastName: userData.user.lastName,
-                vendors: userData.vendors.map((vendor) => vendor.companyName.trim()),
+                vendors: userData.vendorNames,
             };
 
             // Only save to sessionStorage if we have a valid ID
@@ -471,6 +469,7 @@ export function ChatProvider({ children, ...props }) {
                 promptName: "vendor-chatbot-voice",
                 data: {
                     firstName,
+                    email: telepersonUser?.email || "",
                     today: format(new Date(), "EEEE, MMMM do, yyyy"),
                     numVendors: vendors.length,
                     vendorNames: vendors.map((vendor) => `- ${vendor}`).join("\n"),
@@ -489,6 +488,8 @@ export function ChatProvider({ children, ...props }) {
 
         systemMessage = promptResult.data.systemMessage;
 
+        console.log(systemMessage);
+
         return getVapiAssistantConfig({
             vendors,
             firstMessage,
@@ -505,7 +506,7 @@ export function ChatProvider({ children, ...props }) {
         const dynamicAssistantOptions = await createAssistantOptions(telepersonUser);
 
         // Start the call with dynamic options
-        vapiRef.current.start("e2af608c-082a-4dfc-a444-535e5642a7f5", dynamicAssistantOptions);
+        vapiRef.current.start("6a897780-e9a7-421f-bd9e-073cd8230a43", dynamicAssistantOptions);
     };
 
     const endCall = () => {

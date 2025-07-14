@@ -13,8 +13,7 @@ import { rateLimiting } from "@/lib/rateLimit";
 import slackNotification from "@/lib/slackNotification";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-import { saveChat, saveConversationSales, findRelevantContent } from "@/lib/chat-helpers";
-import { chatTools } from "@/lib/chat-tools";
+import { saveChat, saveConversationSales } from "@/lib/chat-helpers";
 import { geolocation } from "@vercel/functions";
 
 import { Langfuse } from "langfuse";
@@ -76,29 +75,18 @@ export async function POST(req, { params }) {
         let knowledgeBase = { content: "", sources: [], messageSources: [] };
         let rephrasedInquiry = userQuestion;
 
-        // const mcpServerUrl = "https://aa2e-2601-280-5c00-7d80-5cf3-b53f-66df-8edc.ngrok-free.app";
-        const mcpServerUrl = process.env.MCP_SERVER_DOMAIN;
-
-        const mcpClientBooking = await experimental_createMCPClient({
+        const mcpClientSales = await experimental_createMCPClient({
             transport: {
                 type: "sse",
-                url: `${mcpServerUrl}/booking/sse`,
-            },
-        });
-        const mcpClientWebsite = await experimental_createMCPClient({
-            transport: {
-                type: "sse",
-                url: `${mcpServerUrl}/website/sse`,
+                url: `${process.env.MCP_SERVER_DOMAIN}/sales/text/sse`,
             },
         });
 
-        const mcpBookingTools = await mcpClientBooking.tools();
-        const mcpWebsiteTools = await mcpClientWebsite.tools();
+        const mcpSalesTools = await mcpClientSales.tools();
 
         const allTools = {
-            ...mcpBookingTools,
-            ...mcpWebsiteTools,
-            ...chatTools,
+            ...mcpSalesTools,
+            // ...chatTools,
         };
 
         // Return data stream response with annotations and status updates
@@ -121,8 +109,7 @@ export async function POST(req, { params }) {
                         metadata: {},
                     },
                     async onFinish({ text, toolCalls }) {
-                        await mcpClientBooking.close();
-                        await mcpClientWebsite.close();
+                        await mcpClientSales.close();
 
                         // Add sources to annotations if they exist
                         if (knowledgeBase?.sources.length > 0) {
@@ -188,8 +175,7 @@ export async function POST(req, { params }) {
                     onError: async ({ error }) => {
                         console.log(`error -->`, error);
 
-                        await mcpClientBooking.close();
-                        await mcpClientWebsite.close();
+                        await mcpClientSales.close();
                     },
                 });
 
@@ -198,8 +184,8 @@ export async function POST(req, { params }) {
             },
             onError: async (error) => {
                 console.log(`error -->`, error);
-                await mcpClientBooking.close();
-                await mcpClientWebsite.close();
+                await mcpClientSales.close();
+
                 // Return user-friendly error message
                 if (error == null) return "Unknown error";
                 if (typeof error === "string") return error;
