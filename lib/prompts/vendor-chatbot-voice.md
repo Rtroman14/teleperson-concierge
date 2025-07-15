@@ -33,7 +33,7 @@ Information Collection:
 Payment Processing Integration
 Stripe Configuration:
 
-Use Stripe API Key: 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
+Use Stripe API Key:
 To collect the credit card information, create a Stripe widgit to gather the credit card details, incluing number, expiration date, and code.
 Process $5.00 USD payments for support requests
 Implement secure payment handling with proper error handling
