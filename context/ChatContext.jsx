@@ -127,6 +127,7 @@ export function ChatProvider({ children, ...props }) {
             // ! DELETE THIS IN PRODUCTION
             // If no user in sessionStorage, fetch with default email for development
             // fetchTelepersonUserData("jesse@teleperson.com");
+            // fetchTelepersonUserData("ryan@webagent.ai");
         }
     }, []);
 
@@ -231,6 +232,7 @@ export function ChatProvider({ children, ...props }) {
             if (event.data?.type === "USER_LOGOUT") {
                 sessionStorage.clear();
                 localStorage.clear();
+                setTelepersonUser(initialTelepersonUser);
             }
         };
 
