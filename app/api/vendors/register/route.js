@@ -98,7 +98,7 @@ export async function POST(request) {
             axios
                 .post(`${process.env.CRAWL_AI_SCRAPER_FUNCTION}/crawl-links`, {
                     url: normalizedURL,
-                    max_depth: 5,
+                    max_depth: 2,
                     vendor_id: upsertedVendor.id,
                 })
                 .catch((error) => {
