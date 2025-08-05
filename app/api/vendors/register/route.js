@@ -21,6 +21,12 @@ const supabase = createClient(
 );
 
 export async function POST(request) {
+    // TODO: REMOVE ONCE READY TO SCRAPE VENDORS
+    return NextResponse.json(
+        { success: false, message: "Pausing vendor registration until ready to pay for service." },
+        { status: 401 }
+    );
+
     // Add auth check
     if (!authenticateRequest(request)) {
         return NextResponse.json(
