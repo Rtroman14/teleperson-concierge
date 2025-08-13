@@ -294,7 +294,10 @@ export function ChatProvider({ children, ...props }) {
             systemMessage = promptResult.data.systemMessage;
 
             // Create dynamic assistantOptions with current telepersonUser and fetched system message
-            const dynamicAssistantOptions = getVapiSalesAssistantConfig(systemMessage);
+            const dynamicAssistantOptions = getVapiSalesAssistantConfig(
+                systemMessage,
+                "dj3G1R1ilKoFKhBnWOzG"
+            );
 
             // Start the call with dynamic options
             vapiRef.current.start("e2af608c-082a-4dfc-a444-535e5642a7f5", dynamicAssistantOptions);
